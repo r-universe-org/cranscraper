@@ -49,7 +49,7 @@ cran_registry_update_json <- function(){
   df <- data.frame(
     package = registry$Package,
     maintainer = registry$Maintainer,
-    git = registry$Git,
+    url = registry$Git,
     available = (registry$status == 200),
     owner = slugify_owner(registry$Git),
     stringsAsFactors = FALSE)
