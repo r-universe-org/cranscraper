@@ -28,7 +28,7 @@ cran_registry_with_status <- function(){
   lapply(seq_along(packages$Git), function(i){
     k <- i
     pkg <- as.list(packages[k,])
-    desc_url <- paste0(pkg$Git, '/raw/master/DESCRIPTION')
+    desc_url <- paste0(pkg$Git, '/raw/HEAD/DESCRIPTION')
     curl::curl_fetch_multi(desc_url, done = function(res){
       statusvec[k] <<- res$status
       if(res$status != 200)
