@@ -61,7 +61,12 @@ cran_registry_update_json <- function(){
     jsonlite::write_json(userdata, path = path, pretty = TRUE)
     return(path)
   }, character(1))
-  gert::git_add(paths)
+
+  # Delete file that no longer exist
+  oldfiles <- list.files(pattern="\\.json$")
+  removed <- oldfiles[!(oldfiles %in% paths)]
+  unlink(removed)
+  gert::git_add(c(removed, paths))
   if(nrow(gert::git_status(staged = TRUE)) == 0){
     message("No changes in registry")
   } else {
@@ -80,9 +85,5 @@ read_description <- function(desc_url){
 slugify_owner <- function(url){
   owner <- basename(dirname(url))
   host <- gsub("^(git|https?)://", "", dirname(dirname(url)))
-  if(host == "github.com"){
-    # default shorthand assumes github.com users
-    return(owner)
-  }
-  paste0(owner, '@', gsub("/", "_", host))
+  ifelse(host == 'github.com', owner, paste0(owner, '@', gsub("/", "_", host)))
 }
