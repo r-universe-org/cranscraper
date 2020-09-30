@@ -78,7 +78,11 @@ read_description <- function(desc_url){
 }
 
 slugify_owner <- function(url){
-  owner <- dirname(url)
-  owner <- gsub("/", "_", gsub("^https?://", "", owner), fixed = TRUE)
-  sub("github.com_", "", owner)
+  owner <- basename(dirname(url))
+  host <- gsub("^(git|https?)://", "", dirname(dirname(url)))
+  if(host == "github.com"){
+    # default shorthand assumes github.com users
+    return(owner)
+  }
+  paste0(owner, '@', gsub("/", "_", host))
 }
