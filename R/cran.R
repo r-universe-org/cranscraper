@@ -34,13 +34,17 @@ cran_registry_with_status <- function(){
       statusvec[k] <<- res$status
       if(res$status != 200){
         message("HTTP error: ", pkg$Package, " from ", pkg$Git,  ": ", res$status)
-        alt_url <- paste0(pkg$Git, '/raw/HEAD/pkg/DESCRIPTION')
-        curl::curl_fetch_multi(alt_url, done = function(res){
-          if(res$status == 200){
-            subdirvec[k] <<- 'pkg'
-            statusvec[k] <<- res$status
-          }
-        }, pool = pool)
+        alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), pkg$Package)
+        lapply(alt_subdirs, function(alt_dir){
+          alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
+          curl::curl_fetch_multi(alt_url, done = function(res){
+            if(res$status == 200){
+              message("Found subdir for: ", pkg$Package, " in ", alt_dir)
+              subdirvec[k] <<- alt_dir
+              statusvec[k] <<- res$status
+            }
+          }, pool = pool)
+        })
       }
     }, fail = function(e){
       message("Failure for ", pkg$Package, ": ", e$message)

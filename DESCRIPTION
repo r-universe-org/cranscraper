@@ -4,7 +4,7 @@ Title: Scrape CRAN for git repositories
 Version: 0.1.0
 Authors@R: person("Jeroen", "Ooms", ,"jeroen@berkeley.edu", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4035-0289"))
-Description: Scrape CRAN for git repositories
+Description: Scrape CRAN for git repositories.
 Encoding: UTF-8
 LazyData: true
 Imports: 
