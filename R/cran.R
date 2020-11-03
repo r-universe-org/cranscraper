@@ -24,6 +24,7 @@ cran_registry_with_status <- function(){
   packages <- cran_registry()
   packages <- packages[!is.na(packages$Git),]
   statusvec <- rep(0, nrow(packages))
+  subdirvec <- rep(NA, nrow(packages))
   pool <- curl::new_pool()
   lapply(seq_along(packages$Git), function(i){
     k <- i
@@ -31,14 +32,23 @@ cran_registry_with_status <- function(){
     desc_url <- paste0(pkg$Git, '/raw/HEAD/DESCRIPTION')
     curl::curl_fetch_multi(desc_url, done = function(res){
       statusvec[k] <<- res$status
-      if(res$status != 200)
+      if(res$status != 200){
         message("HTTP error: ", pkg$Package, " from ", pkg$Git,  ": ", res$status)
+        alt_url <- paste0(pkg$Git, '/raw/HEAD/pkg/DESCRIPTION')
+        curl::curl_fetch_multi(alt_url, done = function(res){
+          if(res$status == 200){
+            subdirvec[k] <<- 'pkg'
+            statusvec[k] <<- res$status
+          }
+        }, pool = pool)
+      }
     }, fail = function(e){
       message("Failure for ", pkg$Package, ": ", e$message)
     }, pool = pool)
   })
   curl::multi_run(pool = pool)
   packages$status <- statusvec
+  packages$subdir <- subdirvec
   return(packages)
 }
 
@@ -50,6 +60,7 @@ cran_registry_update_json <- function(){
     package = registry$Package,
     maintainer = registry$Maintainer,
     url = registry$Git,
+    subdir = registry$subdir,
     available = (registry$status == 200),
     owner = slugify_owner(registry$Git),
     stringsAsFactors = FALSE)
