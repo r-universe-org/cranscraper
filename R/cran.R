@@ -10,7 +10,7 @@ cran_registry <- function(){
   curl::curl_download('https://cloud.r-project.org/web/packages/packages.rds', destfile = tmp)
   packages <- as.data.frame(readRDS(tmp), stringsAsFactors = FALSE)
   input <- paste(packages$BugReports, packages$URL)
-  input <- gsub('r-forge.r-project.org/projects/', 'github.com/rforge/', input, fixed = TRUE)
+  input <- gsub('r-forge.r-project.org/projects/', 'github.com/r-forge/', input, fixed = TRUE)
   pattern <- 'https?://(github.com|gitlab.com|bitbucket.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
   m <- regexpr(pattern, input, ignore.case = TRUE)
   rows <- !is.na(m) & m > -1
