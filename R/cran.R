@@ -9,7 +9,8 @@ cran_registry <- function(){
   on.exit(unlink(tmp))
   curl::curl_download('https://cloud.r-project.org/web/packages/packages.rds', destfile = tmp)
   packages <- as.data.frame(readRDS(tmp), stringsAsFactors = FALSE)
-  input <- replace_rforge_urls(paste(packages$BugReports, packages$URL))
+  input <- paste(packages$BugReports, packages$URL)
+  input <- paste(input, replace_rforge_urls(input)) #Prefer GitHub URL over r-forge guess
   pattern <- 'https?://(github.com|gitlab.com|bitbucket.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
   m <- regexpr(pattern, input, ignore.case = TRUE)
   rows <- !is.na(m) & m > -1
