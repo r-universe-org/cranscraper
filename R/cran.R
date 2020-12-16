@@ -9,9 +9,7 @@ cran_registry <- function(){
   on.exit(unlink(tmp))
   curl::curl_download('https://cloud.r-project.org/web/packages/packages.rds', destfile = tmp)
   packages <- as.data.frame(readRDS(tmp), stringsAsFactors = FALSE)
-  input <- paste(packages$BugReports, packages$URL)
-  input <- gsub('r-forge\\.r-project\\.org/projects/', 'github.com/r-forge/', input, ignore.case = TRUE)
-  input <- gsub("https?://([A-Za-z0-9_.-]+)\\.r-forge\\.r-project\\.org", 'https://github.com/r-forge/\\1', input, ignore.case = TRUE)
+  input <- replace_rforge_urls(paste(packages$BugReports, packages$URL))
   pattern <- 'https?://(github.com|gitlab.com|bitbucket.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
   m <- regexpr(pattern, input, ignore.case = TRUE)
   rows <- !is.na(m) & m > -1
@@ -103,4 +101,10 @@ slugify_owner <- function(url){
   owner <- basename(dirname(url))
   host <- gsub("^(git|https?)://", "", dirname(dirname(url)))
   ifelse(host == 'github.com', owner, paste0(owner, '@', gsub("/", "_", host)))
+}
+
+replace_rforge_urls <- function(input){
+  input <- gsub('r-forge\\.r-project\\.org/projects/', 'github.com/r-forge/', input, ignore.case = TRUE)
+  input <- gsub("https?://lists\\.r-forge\\.r-project\\.org", "", input, ignore.case = TRUE) # Remove URLS to mailing list
+  gsub("https?://([A-Za-z0-9_.-]+)\\.r-forge\\.r-project\\.org", 'https://github.com/r-forge/\\1', input, ignore.case = TRUE)
 }
