@@ -11,6 +11,7 @@ cran_registry <- function(){
   packages <- as.data.frame(readRDS(tmp), stringsAsFactors = FALSE)
   input <- paste(packages$BugReports, packages$URL)
   input <- gsub('r-forge\\.r-project\\.org/projects/', 'github.com/r-forge/', input, ignore.case = TRUE)
+  input <- gsub("https?://(.+)\\.r-forge\\.r-project\\.org/?", 'https://github.com/r-forge/\\1', input, ignore.case = TRUE)
   pattern <- 'https?://(github.com|gitlab.com|bitbucket.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
   m <- regexpr(pattern, input, ignore.case = TRUE)
   rows <- !is.na(m) & m > -1
