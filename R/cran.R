@@ -16,10 +16,11 @@ cran_registry <- function(){
 #' @export
 #' @rdname cran
 bioc_registry <- function(){
-  # Currently, bioc does not seem to have a packages.rds containing URL and BugReports
+  # Bioc does not seem to have a packages.rds containing URL and BugReports
   bioc <- jsonlite::read_json('https://bioconductor.org/packages/json/3.13/bioc/packages.json')
   names(bioc) <- NULL
   packages <- jsonlite:::simplify(bioc)
+  stopifnot(is.data.frame(packages), nrow(packages) > 1000)
   packages$Git <- find_git_url(packages)
   return(packages)
 }
