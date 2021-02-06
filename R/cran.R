@@ -36,10 +36,23 @@ find_git_url <- function(packages){
   return(output)
 }
 
+first_maintainer <- function(x){
+  vapply(x, function(x){
+    ps <- as.person(x)
+    ifelse(length(ps) == 1, x, as.character(ps[1]))
+  }, character(1))
+}
+
 #' @export
 #' @rdname cran
 cran_registry_with_status <- function(){
-  packages <- cran_registry()
+  cran <- cran_registry()
+  bioc <- bioc_registry()
+  packages <- data.frame(
+    Package = c(cran$Package, bioc$Package),
+    Maintainer = first_maintainer(c(cran$Maintainer, bioc$Maintainer)),
+    Git = c(cran$Git, bioc$Git)
+  )
   packages <- packages[!is.na(packages$Git),]
   statusvec <- rep(0, nrow(packages))
   subdirvec <- rep(NA, nrow(packages))
