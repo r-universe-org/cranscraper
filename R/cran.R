@@ -9,14 +9,31 @@ cran_registry <- function(){
   on.exit(unlink(tmp))
   curl::curl_download('https://cloud.r-project.org/web/packages/packages.rds', destfile = tmp)
   packages <- as.data.frame(readRDS(tmp), stringsAsFactors = FALSE)
+  packages$Git <- find_git_url(packages)
+  return(packages)
+}
+
+#' @export
+#' @rdname cran
+bioc_registry <- function(){
+  # Currently, bioc does not seem to have a packages.rds containing URL and BugReports
+  bioc <- jsonlite::read_json('https://bioconductor.org/packages/json/3.13/bioc/packages.json')
+  names(bioc) <- NULL
+  packages <- jsonlite:::simplify(bioc)
+  packages$Git <- find_git_url(packages)
+  return(packages)
+}
+
+find_git_url <- function(packages){
   input <- paste(packages$BugReports, packages$URL)
   input <- paste(input, replace_rforge_urls(input)) #Prefer GitHub URL over r-forge guess
+  output <- rep(NA_character_, length(input))
   pattern <- 'https?://(github.com|gitlab.com|bitbucket.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
   m <- regexpr(pattern, input, ignore.case = TRUE)
   rows <- !is.na(m) & m > -1
   urls <- regmatches(input, m)
-  packages[rows,'Git'] <- sub("\\.git$", "", sub("^http://", "https://", tolower(urls)))
-  return(packages)
+  output[rows] <- sub("\\.git$", "", sub("^http://", "https://", tolower(urls)))
+  return(output)
 }
 
 #' @export
