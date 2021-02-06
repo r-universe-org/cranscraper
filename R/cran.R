@@ -52,7 +52,8 @@ cran_registry_with_status <- function(){
   packages <- data.frame(
     Package = c(cran$Package, bioc$Package),
     Maintainer = first_maintainer(c(cran$Maintainer, bioc$Maintainer)),
-    Git = c(cran$Git, bioc$Git)
+    Git = c(cran$Git, bioc$Git),
+    stringsAsFactors = FALSE
   )
   packages <- packages[!is.na(packages$Git),]
   statusvec <- rep(0, nrow(packages))
@@ -66,8 +67,6 @@ cran_registry_with_status <- function(){
       statusvec[k] <<- res$status
       if(res$status != 200){
         message("HTTP error: ", pkg$Package, " from ", pkg$Git,  ": ", res$status)
-        if(!is.character(pkg$Package))
-          stop("Package is not a string: ", pkg$Package)
         alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), pkg$Package)
         lapply(alt_subdirs, function(alt_dir){
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
