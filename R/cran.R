@@ -57,7 +57,8 @@ cran_registry_with_status <- function(){
   )
   packages <- packages[!is.na(packages$Git),]
   statusvec <- rep(0, nrow(packages))
-  subdirvec <- rep(NA, nrow(packages))
+  subdirvec <- rep(NA_character_, nrow(packages))
+  realurlvec <- packages$Git
   pool <- curl::new_pool()
   lapply(seq_along(packages$Git), function(i){
     k <- i
@@ -65,7 +66,9 @@ cran_registry_with_status <- function(){
     desc_url <- paste0(pkg$Git, '/raw/HEAD/DESCRIPTION')
     curl::curl_fetch_multi(desc_url, done = function(res){
       statusvec[k] <<- res$status
-      if(res$status != 200){
+      if(res$status == 200){
+        realurlvec[k] <<- get_real_url(pkg$Git, res$url)
+      } else {
         message("HTTP error: ", pkg$Package, " from ", pkg$Git,  ": ", res$status)
         alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), pkg$Package)
         lapply(alt_subdirs, function(alt_dir){
@@ -75,6 +78,7 @@ cran_registry_with_status <- function(){
               message("Found subdir for: ", pkg$Package, " in ", alt_dir)
               subdirvec[k] <<- alt_dir
               statusvec[k] <<- res$status
+              realurlvec[k] <<- get_real_url(pkg$Git, res$url)
             }
           }, pool = pool)
         })
@@ -86,7 +90,21 @@ cran_registry_with_status <- function(){
   curl::multi_run(pool = pool)
   packages$status <- statusvec
   packages$subdir <- subdirvec
+  packages$Git <- realurlvec
   return(packages)
+}
+
+# This is to detect redirects for moved GitHub repositories
+get_real_url <- function(git_url, description_url){
+  # Workaround for bitbucket redirecting to a login page
+  if(grepl("atlassian.com", description_url))
+    return(git_url)
+  new_repo <- sub(".*://[^/]+/([^/]+/[^/]+).*", '\\1', description_url)
+  updated_git_url <- sub("(.*://[^/]+)/([^/]+/[^/]+)(.*)", paste0('\\1/', new_repo), git_url)
+  if(tolower(updated_git_url) != tolower(git_url)){
+    message(sprintf("Repo moved from %s to %s", git_url, updated_git_url))
+  }
+  return(updated_git_url)
 }
 
 #' @export
@@ -133,7 +151,7 @@ read_description <- function(desc_url){
 slugify_owner <- function(url){
   owner <- basename(dirname(url))
   host <- gsub("^(git|https?)://", "", dirname(dirname(url)))
-  ifelse(host == 'github.com', owner, paste0(owner, '@', gsub("/", "_", host)))
+  tolower(ifelse(host == 'github.com', owner, paste0(owner, '@', gsub("/", "_", host))))
 }
 
 replace_rforge_urls <- function(input){
