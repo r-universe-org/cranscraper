@@ -99,8 +99,9 @@ get_real_url <- function(git_url, description_url){
   # Workaround for bitbucket redirecting to a login page
   if(grepl("atlassian.com", description_url))
     return(git_url)
+  domain <- sub("(.*://[^/]+)/.*", '\\1', git_url)
   new_repo <- sub(".*://[^/]+/([^/]+/[^/]+).*", '\\1', description_url)
-  updated_git_url <- sub("(.*://[^/]+)/([^/]+/[^/]+)(.*)", paste0('\\1/', new_repo), git_url)
+  updated_git_url <- paste0(domain, '/', new_repo)
   if(tolower(updated_git_url) != tolower(git_url)){
     message(sprintf("Repo moved from %s to %s", git_url, updated_git_url))
   }
