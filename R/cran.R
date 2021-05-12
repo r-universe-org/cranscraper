@@ -121,6 +121,11 @@ cran_registry_update_json <- function(){
     owner = slugify_owner(registry$Git),
     stringsAsFactors = FALSE)
 
+  # Save the CSV
+  csvdata <- df[c('package', 'url')]
+  write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE)
+  gert::git_add('crantogit.csv')
+
   # Split by owner
   paths <- vapply(split(df, df$owner), function(userdata){
     path <- paste0(userdata$owner[1], '.json')
