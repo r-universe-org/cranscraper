@@ -27,7 +27,7 @@ bioc_registry <- function(){
 
 find_git_url <- function(packages){
   input <- paste(packages$BugReports, packages$URL)
-  input <- gsub('//www.github.com', '//github.com', input, fixed = TRUE)
+  input <- gsub('//www.github.com', 'github.com', input, fixed = TRUE)
   input <- paste(input, replace_rforge_urls(input)) #Prefer GitHub URL over r-forge guess
   output <- rep(NA_character_, length(input))
   pattern <- 'https?://(github.com|gitlab.com|bitbucket.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
