@@ -102,8 +102,8 @@ get_real_url <- function(git_url, description_url){
     return(git_url)
   domain <- sub("(.*://[^/]+)/.*", '\\1', git_url)
   new_repo <- sub(".*://[^/]+/([^/]+/[^/]+).*", '\\1', description_url)
-  updated_git_url <- paste0(domain, '/', new_repo)
-  if(tolower(updated_git_url) != tolower(git_url)){
+  updated_git_url <- tolower(paste0(domain, '/', new_repo))
+  if(updated_git_url != tolower(git_url)){
     message(sprintf("Repo moved from %s to %s", git_url, updated_git_url))
   }
   return(updated_git_url)
