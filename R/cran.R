@@ -135,6 +135,10 @@ cran_registry_update_json <- function(){
     return(path)
   }, character(1))
 
+  # A dummy packages.json that is used as fallback for empty universes
+  jsonlite::write_json(list(), path = 'packages.json', pretty = TRUE)
+  paths <- c(paths, 'packages.json')
+
   # Delete file that no longer exist
   oldfiles <- list.files(pattern="\\.json$")
   removed <- oldfiles[!(oldfiles %in% paths)]
