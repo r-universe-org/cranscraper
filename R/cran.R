@@ -40,7 +40,7 @@ find_git_url <- function(packages){
 
 first_maintainer <- function(x){
   vapply(x, function(x){
-    ps <- as.person(x)
+    ps <- utils::as.person(x)
     ifelse(length(ps) == 1, x, as.character(ps[1]))
   }, character(1))
 }
@@ -57,42 +57,63 @@ cran_registry_with_status <- function(){
     stringsAsFactors = FALSE
   )
   packages <- packages[!is.na(packages$Git),]
-  statusvec <- rep(0, nrow(packages))
+  foundvec <- rep(FALSE, nrow(packages))
   subdirvec <- rep(NA_character_, nrow(packages))
   realurlvec <- packages$Git
   pool <- curl::new_pool()
   lapply(seq_along(packages$Git), function(i){
     k <- i
     pkg <- as.list(packages[k,])
+    package <- pkg$Package
     desc_url <- paste0(pkg$Git, '/raw/HEAD/DESCRIPTION')
     curl::curl_fetch_multi(desc_url, done = function(res){
-      statusvec[k] <<- res$status
-      if(res$status == 200){
+      if(res$status == 200 && test_package_match(res$content, package)){
+        foundvec[k] <<- TRUE
         realurlvec[k] <<- get_real_url(pkg$Git, res$url)
       } else {
-        message("HTTP error: ", pkg$Package, " from ", pkg$Git,  ": ", res$status)
-        alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), pkg$Package)
+        message("HTTP or description error: ", package, " from ", pkg$Git,  ": ", res$status)
+        alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), package)
         lapply(alt_subdirs, function(alt_dir){
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
-          curl::curl_fetch_multi(alt_url, done = function(res){
-            if(res$status == 200){
-              message("Found subdir for: ", pkg$Package, " in ", alt_dir)
+          curl::curl_fetch_multi(alt_url, done = function(res2){
+            if(res2$status == 200 && test_package_match(res2$content, package)){
+              message("Found subdir for: ", package, " in ", alt_dir)
+              foundvec[k] <<- TRUE
               subdirvec[k] <<- alt_dir
-              statusvec[k] <<- res$status
-              realurlvec[k] <<- get_real_url(pkg$Git, res$url)
+              realurlvec[k] <<- get_real_url(pkg$Git, res2$url)
             }
           }, pool = pool)
         })
       }
     }, fail = function(e){
-      message("Failure for ", pkg$Package, ": ", e$message)
+      message("Failure for ", package, ": ", e$message)
     }, pool = pool)
   })
   curl::multi_run(pool = pool)
-  packages$status <- statusvec
+  packages$found <- foundvec
   packages$subdir <- subdirvec
   packages$Git <- realurlvec
   return(packages)
+}
+
+test_package_match <- function(buf, package){
+  tryCatch({
+    realname <- parse_description_package(buf)
+    out <- identical(realname, package)
+    if(!out){
+      message(sprintf("Package name from DESCRIPTION '%s' does not match package '%s'", realname, package))
+    }
+    out
+  }, error = function(e){
+    message(sprintf("Failed to parse DESCRIPTION for package '%s' %s", package, e$message))
+    FALSE
+  })
+}
+
+parse_description_package <- function(buf){
+  con <- rawConnection(buf)
+  on.exit(close(con))
+  trimws(unname(read.dcf(con)[,'Package']))
 }
 
 # This is to detect redirects for moved GitHub repositories
@@ -118,13 +139,13 @@ cran_registry_update_json <- function(){
     maintainer = registry$Maintainer,
     url = registry$Git,
     subdir = registry$subdir,
-    available = (registry$status == 200),
+    available = registry$found,
     owner = slugify_owner(registry$Git),
     stringsAsFactors = FALSE)
 
   # Save the CSV
   csvdata <- df[c('package', 'url')]
-  write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE)
+  utils::write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE)
   gert::git_add('crantogit.csv')
 
   # Split by owner
