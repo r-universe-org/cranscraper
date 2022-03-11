@@ -27,7 +27,7 @@ bioc_registry <- function(){
 
 find_git_url <- function(packages){
   input <- paste(packages$BugReports, packages$URL)
-  input <- gsub('//www.github.com', '//github.com', input, fixed = TRUE)
+  input <- normalize_github_urls(input)
   input <- paste(input, replace_rforge_urls(input)) #Prefer GitHub URL over r-forge guess
   output <- rep(NA_character_, length(input))
   pattern <- 'https?://(github.com|gitlab.com|bitbucket.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
@@ -190,4 +190,9 @@ replace_rforge_urls <- function(input){
   input <- gsub('r-forge\\.r-project\\.org/projects/', 'github.com/r-forge/', input, ignore.case = TRUE)
   input <- gsub("https?://lists\\.r-forge\\.r-project\\.org", "", input, ignore.case = TRUE) # Remove URLS to mailing list
   gsub("https?://([A-Za-z0-9_.-]+)\\.r-forge\\.r-project\\.org", 'https://github.com/r-forge/\\1', input, ignore.case = TRUE)
+}
+
+normalize_github_urls <- function(input){
+  input <- gsub('//www.github.com', '//github.com', input, fixed = TRUE)
+  gsub("https?://(\\w+)\\.github\\.io/(\\w+)", 'https://github.com/\\1/\\2', input)
 }
