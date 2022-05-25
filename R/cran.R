@@ -144,8 +144,8 @@ cran_registry_update_json <- function(){
     stringsAsFactors = FALSE)
 
   # Save the CSV
-  csvdata <- df[c('package', 'url')]
-  utils::write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE)
+  csvdata <- df[df$available, c('package', 'url', 'subdir')]
+  utils::write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE, na = "")
   gert::git_add('crantogit.csv')
 
   # Split by owner
