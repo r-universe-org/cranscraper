@@ -9,6 +9,7 @@ cran_registry <- function(){
   on.exit(unlink(tmp))
   curl::curl_download('https://cloud.r-project.org/web/packages/packages.rds', destfile = tmp)
   packages <- as.data.frame(readRDS(tmp), stringsAsFactors = FALSE)
+  packages <- packages[!duplicated(packages$Package),]
   packages$Git <- find_git_url(packages)
   return(packages)
 }
