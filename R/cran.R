@@ -74,6 +74,7 @@ cran_registry_with_status <- function(){
         foundvec[k] <<- TRUE
         realurlvec[k] <<- get_real_url(pkg$Git, res$url)
       } else {
+        # Todo: if status != 404 (e.g. 403 or fail), then keep existing settings
         message("HTTP or description error: ", package, " from ", pkg$Git,  ": ", res$status)
         alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), package)
         lapply(alt_subdirs, function(alt_dir){
