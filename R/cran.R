@@ -184,9 +184,8 @@ read_description <- function(desc_url){
 }
 
 slugify_owner <- function(url){
-  owner <- basename(dirname(url))
-  host <- gsub("^(git|https?)://", "", dirname(dirname(url)))
-  tolower(ifelse(host == 'github.com', owner, paste0(owner, '@', gsub("/", "_", host))))
+  owner <- sub('.*://([a-z]+).*/([^/]*)/.*', '\\1-\\2', url)
+  sub('github-', '', owner)
 }
 
 replace_rforge_urls <- function(input){
