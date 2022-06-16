@@ -59,6 +59,7 @@ cran_registry_with_status <- function(){
     Git = c(cran$Git, bioc$Git),
     stringsAsFactors = FALSE
   )
+  packages$Git[grepl("https://github.com/cran/", packages$Git, fixed = TRUE)] <- NA # No mirror urls
   packages <- packages[!is.na(packages$Git),]
   foundvec <- rep(FALSE, nrow(packages))
   subdirvec <- rep(NA_character_, nrow(packages))
