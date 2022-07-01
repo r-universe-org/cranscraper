@@ -78,6 +78,7 @@ cran_registry_with_status <- function(){
         # Todo: if status != 404 (e.g. 403 or fail), then keep existing settings
         message("HTTP or description error: ", package, " from ", pkg$Git,  ": ", res$status)
         alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), package)
+        if(package == 'duckdb') alt_subdirs <- 'tools/rpkg'
         lapply(alt_subdirs, function(alt_dir){
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
           curl::curl_fetch_multi(alt_url, done = function(res2){
