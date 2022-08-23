@@ -119,7 +119,11 @@ test_package_match <- function(buf, package){
 parse_description_package <- function(buf){
   con <- rawConnection(buf)
   on.exit(close(con))
-  trimws(unname(read.dcf(con)[,'Package']))
+  desc <- read.dcf(con)
+  if('Config/noindex' %in% colnames(desc)){
+    stop("Package has Config/noindex field")
+  }
+  trimws(unname(desc[,'Package']))
 }
 
 # This is to detect redirects for moved GitHub repositories
