@@ -163,6 +163,9 @@ cran_registry_update_json <- function(){
   paths <- vapply(split(df, df$owner), function(userdata){
     path <- paste0(userdata$owner[1], '.json')
     userdata$owner <- NULL
+    if(identical(path, 'bioconductor.json')){
+      userdata <- set_bioc_branch(userdata)
+    }
     jsonlite::write_json(userdata, path = path, pretty = TRUE)
     return(path)
   }, character(1))
