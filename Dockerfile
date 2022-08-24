@@ -1,6 +1,7 @@
 FROM ubuntu:jammy
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV R_BIOC_VERSION 3.15
 
 COPY . /pkg
 COPY entrypoint.sh /entrypoint.sh
