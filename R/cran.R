@@ -44,6 +44,7 @@ cran_registry_with_status <- function(){
     Package = c(cran$Package, bioc$Package),
     Maintainer = first_maintainer(c(cran$Maintainer, bioc$Maintainer)),
     Git = c(cran$Git, bioc$Git),
+    Registry = rep(c(NA, 'bioc'), c(length(cran$Package), length(bioc$Package))),
     stringsAsFactors = FALSE
   )
   packages$Git[grepl("https://github.com/cran/", packages$Git, fixed = TRUE)] <- NA # No mirror urls
@@ -137,11 +138,12 @@ cran_registry_update_json <- function(){
     url = registry$Git,
     subdir = registry$subdir,
     available = registry$found,
+    registry = registry$Registry,
     owner = slugify_owner(registry$Git),
     stringsAsFactors = FALSE)
 
   # Save the CSV
-  csvdata <- df[df$available, c('package', 'url', 'subdir')]
+  csvdata <- df[df$available, c('package', 'url', 'subdir', 'registry')]
   utils::write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE, na = "")
   gert::git_add('crantogit.csv')
 
