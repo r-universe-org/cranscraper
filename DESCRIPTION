@@ -11,5 +11,5 @@ Imports:
     curl,
     jsonlite,
     gert
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 License: Apache License 2.0
