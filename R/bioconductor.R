@@ -2,7 +2,9 @@ bioc_registry <- function(){
   # Bioc does not seem to have a packages.rds containing URL and BugReports
   # Bioc registry version can be overridden with R_BIOC_VERSION
   # bioc_version <- as.character(tools:::.BioC_version_associated_with_R_version())
-  bioc_version <- "3.16" # Use devel branch of registry, to get latest package metadata
+  # Use devel branch of registry, to get latest package set and metadata
+  yml <- yaml::read_yaml("https://bioconductor.org/config.yaml")
+  bioc_version <- yml$devel_version
   bioc <- jsonlite::read_json(sprintf('https://bioconductor.org/packages/json/%s/bioc/packages.json', bioc_version))
   names(bioc) <- NULL
   packages <- jsonlite:::simplify(bioc)
