@@ -17,7 +17,7 @@ RUN \
 # For debugging CI errors:
 RUN \
 	R -e 'install.packages("rlang")'  && \
-	echo 'options(error=rlang::entrace)' Rprofile >> "/etc/R/Rprofile.site"
+	echo 'options(error=rlang::entrace)' >> "/etc/R/Rprofile.site"
 
 ENTRYPOINT ["/entrypoint.sh"]
 
