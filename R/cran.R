@@ -102,8 +102,8 @@ cran_registry_with_status <- function(full_reset = FALSE){
           }, pool = pool)
         })
       }
-    }, fail = function(e){
-      message("Failure for ", package, ": ", e$message)
+    }, fail = function(msg){
+      message("Failure for ", package, ": ", msg)
     }, pool = pool)
   })
   curl::multi_run(pool = pool)
