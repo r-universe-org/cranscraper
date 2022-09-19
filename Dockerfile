@@ -14,5 +14,10 @@ RUN \
 RUN \
 	R -e 'install.packages("remotes"); remotes::install_local("/pkg")'
 
+# For debugging CI errors:
+RUN \
+	R -e 'install.packages("rlang")'  && \
+	echo 'options(error=rlang::entrace)' Rprofile >> "/etc/R/Rprofile.site"
+
 ENTRYPOINT ["/entrypoint.sh"]
 
