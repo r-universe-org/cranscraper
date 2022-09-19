@@ -85,8 +85,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
         message("HTTP or description error: ", package, " from ", pkg$Git,  ": ", res$status)
         alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), package)
         if(package == 'duckdb') alt_subdirs <- 'tools/rpkg'
-        lapply(alt_subdirs, function(test_alt_dir){
-          alt_dir <- test_alt_dir
+        lapply(alt_subdirs, function(alt_dir){
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
           curl::curl_fetch_multi(alt_url, done = function(res2){
             if(res2$status == 200 && test_package_match(res2$content, package)){
@@ -94,7 +93,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
               foundvec[k] <<- TRUE
               subdirvec[k] <<- alt_dir
               realurlvec[k] <<- get_real_url(pkg$Git, res2$url)
-            } else if(isTRUE(foundvec[k]) && res$status == 404 && identical(subdirvec[k], alt_dir)){
+            } else if(isTRUE(foundvec[k]) && res2$status == 404 && identical(subdirvec[k], alt_dir)){
               message("REMOVING package: ", package, " with subdir: ", subdirvec[k])
               foundvec[k] <<- FALSE #package no longer there?
               realurlvec[k] <<- pkg$Git
