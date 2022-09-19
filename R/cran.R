@@ -85,7 +85,8 @@ cran_registry_with_status <- function(full_reset = FALSE){
         message("HTTP or description error: ", package, " from ", pkg$Git,  ": ", res$status)
         alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), package)
         if(package == 'duckdb') alt_subdirs <- 'tools/rpkg'
-        lapply(alt_subdirs, function(alt_dir){
+        lapply(alt_subdirs, function(test_alt_dir){
+          alt_dir <- test_alt_dir
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
           curl::curl_fetch_multi(alt_url, done = function(res2){
             if(res2$status == 200 && test_package_match(res2$content, package)){
