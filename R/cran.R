@@ -37,7 +37,9 @@ first_maintainer <- function(x){
 
 #' @export
 #' @rdname cran
-cran_registry_with_status <- function(){
+#' @param full_reset do not keep data from current `crantogit.csv` in case
+#' of errors.
+cran_registry_with_status <- function(full_reset = FALSE){
   cran <- cran_registry()
   bioc <- bioc_registry()
   packages <- data.frame(
@@ -49,9 +51,19 @@ cran_registry_with_status <- function(){
   )
   packages$Git[grepl("https://github.com/cran/", packages$Git, fixed = TRUE)] <- NA # No mirror urls
   packages <- packages[!is.na(packages$Git),]
-  foundvec <- rep(FALSE, nrow(packages))
-  subdirvec <- rep(NA_character_, nrow(packages))
-  realurlvec <- packages$Git
+
+  # Setup scraper outputs
+  if(isTRUE(full_reset)){
+    foundvec <- rep(FALSE, nrow(packages))
+    subdirvec <- rep(NA_character_, nrow(packages))
+    realurlvec <- packages$Git
+  } else {
+    current <- utils::read.csv('crantogit.csv', na.strings = "")
+    pos <- match(packages$Package, current$package)
+    foundvec <- !is.na(pos)
+    subdirvec <- current$subdir[pos]
+    realurlvec <- ifelse(foundvec, current$url[pos], packages$Git)
+  }
   pool <- curl::new_pool()
   lapply(seq_along(packages$Git), function(i){
     k <- i
@@ -63,7 +75,12 @@ cran_registry_with_status <- function(){
         foundvec[k] <<- TRUE
         realurlvec[k] <<- get_real_url(pkg$Git, res$url)
       } else {
-        # Todo: if status != 404 (e.g. 403 or fail), then keep existing settings
+        # If 404, the package seems removed
+        # In case of other network errors, just do nothing (keeps the current values)
+        if(res$status == 404 && is.na(subdirvec[k])){
+          foundvec[k] <<- FALSE
+          realurlvec[k] <<- pkg$Git
+        }
         message("HTTP or description error: ", package, " from ", pkg$Git,  ": ", res$status)
         alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), package)
         if(package == 'duckdb') alt_subdirs <- 'tools/rpkg'
@@ -75,6 +92,9 @@ cran_registry_with_status <- function(){
               foundvec[k] <<- TRUE
               subdirvec[k] <<- alt_dir
               realurlvec[k] <<- get_real_url(pkg$Git, res2$url)
+            } else if(res$status == 404 && identical(subdirvec[k], alt_dir)){
+              foundvec[k] <<- FALSE #package no longer there?
+              realurlvec[k] <<- pkg$Git
             }
           }, pool = pool)
         })
