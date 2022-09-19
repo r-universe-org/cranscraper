@@ -77,7 +77,8 @@ cran_registry_with_status <- function(full_reset = FALSE){
       } else {
         # If 404, the package seems removed
         # In case of other network errors, just do nothing (keeps the current values)
-        if(res$status == 404 && is.na(subdirvec[k])){
+        if(isTRUE(foundvec[k]) && res$status == 404 && is.na(subdirvec[k])){
+          message("REMOVING package: ", package)
           foundvec[k] <<- FALSE
           realurlvec[k] <<- pkg$Git
         }
@@ -92,9 +93,11 @@ cran_registry_with_status <- function(full_reset = FALSE){
               foundvec[k] <<- TRUE
               subdirvec[k] <<- alt_dir
               realurlvec[k] <<- get_real_url(pkg$Git, res2$url)
-            } else if(res$status == 404 && identical(subdirvec[k], alt_dir)){
+            } else if(isTRUE(foundvec[k]) && res$status == 404 && identical(subdirvec[k], alt_dir)){
+              message("REMOVING package: ", package, " with subdir: ", subdirvec[k])
               foundvec[k] <<- FALSE #package no longer there?
               realurlvec[k] <<- pkg$Git
+              subdirvec[k] <<- NA_character_
             }
           }, pool = pool)
         })
