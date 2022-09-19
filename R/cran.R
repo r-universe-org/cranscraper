@@ -65,7 +65,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
     realurlvec <- ifelse(foundvec, current$url[pos], packages$Git)
   }
   pool <- curl::new_pool()
-  lapply(seq_along(packages$Git), function(i){
+  lapply(sample(seq_along(packages$Git)), function(i){
     k <- i
     pkg <- as.list(packages[k,])
     package <- pkg$Package
