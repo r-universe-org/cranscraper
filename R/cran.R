@@ -198,6 +198,9 @@ cran_registry_update_json <- function(){
   oldfiles <- list.files(pattern="\\.json$")
   removed <- oldfiles[!(oldfiles %in% paths)]
   unlink(removed)
+  if(length(removed) > 100){
+    stop("More than 100 universes were removed. This doesn't seem right.")
+  }
   gert::git_add(c(removed, paths))
   if(nrow(gert::git_status(staged = TRUE)) == 0){
     message("No changes in registry")
