@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:focal
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV R_BIOC_VERSION 3.15
