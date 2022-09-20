@@ -70,7 +70,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
     pkg <- as.list(packages[k,])
     package <- pkg$Package
     desc_url <- paste0(pkg$Git, '/raw/HEAD/DESCRIPTION')
-    curl::curl_fetch_multi(desc_url, done = function(res){
+    curl::curl_fetch_multi(desc_url, handle = myhandle(), done = function(res){
       if(res$status == 200 && test_package_match(res$content, package)){
         foundvec[k] <<- TRUE
         realurlvec[k] <<- get_real_url(pkg$Git, res$url)
@@ -87,7 +87,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
         if(package == 'duckdb') alt_subdirs <- 'tools/rpkg'
         lapply(alt_subdirs, function(alt_dir){
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
-          curl::curl_fetch_multi(alt_url, done = function(res2){
+          curl::curl_fetch_multi(alt_url, handle = myhandle(), done = function(res2){
             if(res2$status == 200 && test_package_match(res2$content, package)){
               message("Found subdir for: ", package, " in ", alt_dir)
               foundvec[k] <<- TRUE
@@ -229,4 +229,8 @@ replace_rforge_urls <- function(input){
 normalize_github_urls <- function(input){
   input <- gsub('//www.github.com', '//github.com', input, fixed = TRUE)
   gsub("https?://([A-Za-z0-9-]+)\\.github\\.io/([A-Za-z0-9_.-]+)", 'https://github.com/\\1/\\2', input)
+}
+
+myhandle <- function(){
+  curl::new_handle(useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36')
 }
