@@ -3,5 +3,3 @@ description: 'Find all CRAN packages with a GitHub repository'
 runs:
   using: 'docker'
   image: 'docker://ghcr.io/r-universe-org/cranscraper'
-env:
-  R_BIOC_VERSION: '3.15'
