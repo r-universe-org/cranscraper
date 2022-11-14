@@ -206,7 +206,7 @@ cran_registry_update_json <- function(){
     message("No changes in registry")
   } else {
     msg <- paste("Registry update at:", Sys.time())
-    gert::git_commit(msg, author = "CRAN <cran@nowhere.com>")
+    gert::git_commit(msg, author = "r-universe[bot] <74155986+r-universe[bot]@users.noreply.github.com>")
     gert::git_push(verbose = TRUE)
   }
 }
