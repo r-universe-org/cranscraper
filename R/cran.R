@@ -51,7 +51,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
     stringsAsFactors = FALSE
   )
   packages$Git[grepl("https://github.com/cran/", packages$Git, fixed = TRUE)] <- NA # No mirror urls
-  packages <- packages[!is.na(packages$Git),]
+  packages <- packages[!is.na(packages$Git) & !duplicated(packages$Package),]
 
   # Setup scraper outputs
   if(isTRUE(full_reset)){
