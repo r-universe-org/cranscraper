@@ -1,4 +1,4 @@
 #!/bin/bash -l
 set -e
-Rscript -e "cranscraper::cran_registry_update_json()"
+Rscript -e "cranscraper::ci_update_all()"
 echo "Action complete!"

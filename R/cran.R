@@ -42,11 +42,12 @@ first_maintainer <- function(x){
 cran_registry_with_status <- function(full_reset = FALSE){
   cran <- cran_registry()
   bioc <- bioc_registry()
+  archived <- archived_registry()
   packages <- data.frame(
-    Package = c(cran$Package, bioc$Package),
-    Maintainer = first_maintainer(c(cran$Maintainer, bioc$Maintainer)),
-    Git = c(cran$Git, bioc$Git),
-    Registry = rep(c(NA, 'bioc'), c(length(cran$Package), length(bioc$Package))),
+    Package = c(cran$Package, bioc$Package, archived$Package),
+    Maintainer = first_maintainer(c(cran$Maintainer, bioc$Maintainer, archived$Maintainer)),
+    Git = c(cran$Git, bioc$Git, archived$Git),
+    Registry = rep(c(NA, 'bioc', 'archived'), c(length(cran$Package), length(bioc$Package), length(archived$Package))),
     stringsAsFactors = FALSE
   )
   packages$Git[grepl("https://github.com/cran/", packages$Git, fixed = TRUE)] <- NA # No mirror urls
@@ -209,6 +210,13 @@ cran_registry_update_json <- function(){
     gert::git_commit(msg, author = "r-universe[bot] <74155986+r-universe[bot]@users.noreply.github.com>")
     gert::git_push(verbose = TRUE)
   }
+}
+
+#' @export
+#' @rdname cran
+ci_update_all <- function(){
+  update_archived_csv()
+  cran_registry_update_json()
 }
 
 read_description <- function(desc_url){

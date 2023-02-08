@@ -12,5 +12,5 @@ Imports:
     jsonlite,
     gert,
     yaml
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 License: Apache License 2.0
