@@ -2,7 +2,7 @@ archived_registry <- function(){
   read.csv('archived.csv')
 }
 
-update_archived_csv <- function(max_age = 30){
+update_archived_csv <- function(max_age = 60){
   old <- if(file.exists('archived.csv')){
     read.csv('archived.csv')
   } else {
@@ -26,7 +26,7 @@ update_archived_csv <- function(max_age = 30){
   write.csv(new, 'archived.csv', row.names = FALSE)
 }
 
-cran_archived_db <- function(max_age = 30){
+cran_archived_db <- function(max_age = 60){
   con <- url("https://cloud.r-project.org/src/contrib/PACKAGES.in")
   on.exit(close(con))
   db <- as.data.frame(read.dcf(con))
