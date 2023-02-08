@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:lunar
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV R_BIOC_VERSION 3.16
