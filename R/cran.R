@@ -216,6 +216,7 @@ cran_registry_update_json <- function(){
 #' @rdname cran
 ci_update_all <- function(){
   update_archived_csv()
+  gert::git_add('archived.csv')
   cran_registry_update_json()
 }
 
