@@ -65,7 +65,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
     subdirvec <- current$subdir[pos]
     realurlvec <- ifelse(foundvec, current$url[pos], packages$Git)
   }
-  pool <- curl::new_pool(multiplex = FALSE)
+  pool <- curl::new_pool(total_con = 1) # assume http2 does the job....
   lapply(sample(seq_along(packages$Git)), function(i){
     k <- i
     pkg <- as.list(packages[k,])
