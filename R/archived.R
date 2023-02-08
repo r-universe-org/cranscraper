@@ -16,7 +16,7 @@ update_archived_csv <- function(max_age = 30){
   new$Git = old$Git[m]
   for(i in which(is.na(m))){
     x <- as.list(new[i,])
-    message("Retrieving updated data for: ", x$Package)
+    message("Downloading archived description for: ", x$Package)
     tryCatch({
       pkginfo <- as.data.frame(read_description(sprintf('https://raw.githubusercontent.com/cran/%s/master/DESCRIPTION', x$Package)))
       new[i, 'Maintainer'] <- pkginfo$Maintainer[1]
