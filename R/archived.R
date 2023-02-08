@@ -41,5 +41,6 @@ cran_archived_db <- function(max_age = 30){
     }
   }, character(1)))
   db$age <- Sys.Date() - db$Date
-  db[!is.na(db$age) & db$age < max_age,c("Package", "Date")]
+  db <- db[!is.na(db$age) & db$age < max_age,c("Package", "Date")]
+  db[order(db$Package),]
 }
