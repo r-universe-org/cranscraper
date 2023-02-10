@@ -11,6 +11,7 @@ update_archived_csv <- function(){
     data.frame(Package=character())
   }
   new <- cran_archived_db()
+  stopifnot(nrow(new) > 1800) # Sanity check
   m <- match(new$Package, old$Package)
   message("Newly archived: ", paste(setdiff(new$Package, old$Package), collapse = ', '))
   message("Expired packages: ", paste(setdiff(old$Package, new$Package), collapse = ', '))
