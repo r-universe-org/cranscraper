@@ -14,7 +14,7 @@ update_archived_csv <- function(){
   stopifnot(nrow(new) > 1800) # Sanity check
   m <- match(new$Package, old$Package)
   message("Newly archived: ", paste(setdiff(new$Package, old$Package), collapse = ', '))
-  message("Expired packages: ", paste(setdiff(old$Package, new$Package), collapse = ', '))
+  message("Unarchived packages: ", paste(setdiff(old$Package, new$Package), collapse = ', '))
   new$Maintainer = old$Maintainer[m]
   new$Git = old$Git[m]
   for(i in which(is.na(m))){
