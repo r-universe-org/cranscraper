@@ -187,6 +187,9 @@ cran_registry_update_json <- function(){
     if(identical(path, 'bioconductor.json')){
       userdata <- set_bioc_branch(userdata)
     }
+    if(identical(path, 'apache.json')){
+      userdata$branch = "*release"
+    }
     jsonlite::write_json(userdata, path = path, pretty = TRUE)
     return(path)
   }, character(1))
