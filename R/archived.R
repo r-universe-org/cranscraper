@@ -1,14 +1,16 @@
-archived_registry <- function(){
-  read.csv('archived.csv')
+archived_registry <- function(max_age = 60, skip = 'request'){
+  df <- read.csv('archived.csv')
+  age <- Sys.Date() - as.Date(df$Date)
+  df[age < max_age & !grepl(skip, df$Reason, ignore.case = TRUE),]
 }
 
-update_archived_csv <- function(max_age = 60){
+update_archived_csv <- function(){
   old <- if(file.exists('archived.csv')){
     read.csv('archived.csv')
   } else {
     data.frame(Package=character())
   }
-  new <- cran_archived_db(max_age = max_age)
+  new <- cran_archived_db()
   m <- match(new$Package, old$Package)
   message("Newly archived: ", paste(setdiff(new$Package, old$Package), collapse = ', '))
   message("Expired packages: ", paste(setdiff(old$Package, new$Package), collapse = ', '))
@@ -23,10 +25,11 @@ update_archived_csv <- function(max_age = 60){
       new[i, 'Git'] <- find_git_url(pkginfo)[1]
     }, error = message)
   }
-  write.csv(new, 'archived.csv', row.names = FALSE)
+  out <- new[c("Package", "Maintainer", "Git", "Date", "Reason")]
+  write.csv(out, 'archived.csv', row.names = FALSE)
 }
 
-cran_archived_db <- function(max_age = 60){
+cran_archived_db <- function(){
   con <- url("https://cloud.r-project.org/src/contrib/PACKAGES.in")
   on.exit(close(con))
   db <- as.data.frame(read.dcf(con))
@@ -40,7 +43,7 @@ cran_archived_db <- function(max_age = 60){
       NA_character_
     }
   }, character(1)))
-  db$age <- Sys.Date() - db$Date
-  db <- db[!is.na(db$age) & db$age < max_age,c("Package", "Date")]
-  db[order(db$Package),]
+  db <- db[!is.na(db$Date) & db$Date >= '2022-01-01',]
+  db$Reason <- gsub("\\s", " ", trimws(sub(" as|for", "", sub(pattern, '', db[['X-CRAN-Comment']]))))
+  db[order(db$Package),c("Package", "Date", "Reason")]
 }
