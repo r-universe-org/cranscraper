@@ -4,7 +4,7 @@
 \alias{cran_registry}
 \alias{cran_registry_with_status}
 \alias{cran_registry_update_json}
-\alias{ci_update_all}
+\alias{update_crantogit_csv}
 \title{CRAN tools}
 \usage{
 cran_registry()
@@ -13,7 +13,7 @@ cran_registry_with_status(full_reset = FALSE)
 
 cran_registry_update_json()
 
-ci_update_all()
+update_crantogit_csv()
 }
 \arguments{
 \item{full_reset}{do not keep data from current `crantogit.csv` in case

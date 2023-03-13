@@ -11,6 +11,9 @@ Imports:
     curl,
     jsonlite,
     gert,
+    gh,
+    ghapps,
+    openssl,
     yaml
 RoxygenNote: 7.2.3
 License: Apache License 2.0

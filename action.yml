@@ -1,5 +1,12 @@
 name: 'Scrape CRAN URLs'
 description: 'Find all CRAN packages with a GitHub repository'
+inputs:
+  update:
+    description: 'One of "crantogit" or "maintainers"'
+    default: 'crantogit'
+
 runs:
   using: 'docker'
   image: 'docker://ghcr.io/r-universe-org/cranscraper'
+  args:
+    - ${{ inputs.update }}
