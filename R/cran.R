@@ -51,6 +51,10 @@ cran_registry_with_status <- function(full_reset = FALSE){
     stringsAsFactors = FALSE
   )
   packages$Git[grepl("https://github.com/cran/", packages$Git, fixed = TRUE)] <- NA # No mirror urls
+  packages$hash <- openssl::sha1(tolower(sub("^.*<(.*)>$", "\\1", packages$Maintainer)))
+  maintainerdb <- read.csv("maintainers.csv")
+  packages <- merge(packages, maintainerdb, by = 'hash', all.x = TRUE)
+
   packages <- packages[!is.na(packages$Git) & !duplicated(packages$Package),]
 
   # Setup scraper outputs
