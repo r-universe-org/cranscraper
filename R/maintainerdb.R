@@ -52,4 +52,14 @@ update_maintainers_csv <- function(){
   db <- db[!is.na(db$login),]
   db <- db[order(paste(tolower(db$login), db$hash), method = 'radix'), c("hash", "login")]
   write.csv(db, 'maintainers.csv', row.names = FALSE, quote = FALSE)
+
+  # Commit update
+  gert::git_add('maintainers.csv')
+  if(nrow(gert::git_status(staged = TRUE)) == 0){
+    message("No changes in 'maintainers.csv'")
+  } else {
+    msg <- paste("Maintainer.csv update at:", Sys.time())
+    gert::git_commit(msg, author = "r-universe[bot] <74155986+r-universe[bot]@users.noreply.github.com>")
+    gert::git_push(verbose = TRUE)
+  }
 }
