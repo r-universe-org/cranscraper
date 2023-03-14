@@ -42,6 +42,10 @@ update_maintainers_csv <- function(){
       } else {
         message(sprintf('HTTP %d (%s)', res$status_code, res$url))
       }
+      if(res$status_code == 403){
+        message("Pausing for a few seconds...")
+        Sys.sleep(10)
+      }
     }, fail = message, pool = pool)
   })
   curl::multi_run(pool = pool)
