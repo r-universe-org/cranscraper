@@ -58,6 +58,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
   packages <- packages[!is.na(packages$Git) & !duplicated(packages$Package),]
 
   # Setup scraper outputs
+  packages <- packages[order(tolower(packages$Package), method = 'radix'),]
   if(isTRUE(full_reset)){
     foundvec <- rep(FALSE, nrow(packages))
     subdirvec <- rep(NA_character_, nrow(packages))
