@@ -14,7 +14,7 @@ check_metacran <- function(){
   pool <- curl::new_pool(multiplex = FALSE)
   completed <- 0
   fetch_version <- function(i){
-    url <- sprintf('https://raw.githubusercontent.com/cran/%s/master/DESCRIPTION', db$Package[i])
+    url <- sprintf('https://raw.githubusercontent.com/cran/%s/HEAD/DESCRIPTION', db$Package[i])
     curl::curl_fetch_multi(url, done = function(res){
       if(res$status_code == 200){
         db$Metacran[i] <<- parse_description_version(res$content)
