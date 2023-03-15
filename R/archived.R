@@ -5,28 +5,26 @@ archived_registry <- function(max_age = 60, skip = 'request'){
 }
 
 update_archived_csv <- function(){
-  old <- if(file.exists('archived.csv')){
-    read.csv('archived.csv')
-  } else {
-    data.frame(Package=character())
-  }
+  old <- read.csv('archived.csv')
   new <- cran_archived_db()
   stopifnot(nrow(new) > 1800) # Sanity check
-  m <- match(new$Package, old$Package)
   message("Newly archived: ", paste(setdiff(new$Package, old$Package), collapse = ', '))
   message("Unarchived packages: ", paste(setdiff(old$Package, new$Package), collapse = ', '))
-  new$Maintainer = old$Maintainer[m]
-  new$Git = old$Git[m]
-  for(i in which(is.na(m))){
-    x <- as.list(new[i,])
-    message("Downloading archived description for: ", x$Package)
+  old$Date <- NULL
+  old$Reason <- NULL
+  db <- merge(new, old, by = "Package", all.x = TRUE)
+  db <- db[order(db$Package, method = 'radix'),]
+  lapply(which(is.na(db$Version)), function(i){
+    pkg <- db$Package[i]
+    message("Downloading archived description for: ", pkg)
     tryCatch({
-      pkginfo <- as.data.frame(read_description(sprintf('https://raw.githubusercontent.com/cran/%s/master/DESCRIPTION', x$Package)))
-      new[i, 'Maintainer'] <- pkginfo$Maintainer[1]
-      new[i, 'Git'] <- find_git_url(pkginfo)[1]
+      pkginfo <- as.data.frame(read_description(sprintf('https://raw.githubusercontent.com/cran/%s/HEAD/DESCRIPTION', pkg)))
+      db$Version[i] <<- pkginfo$Version
+      db$Maintainer[i] <<- pkginfo$Maintainer[1]
+      db$Git[i] <<- find_git_url(pkginfo)[1]
     }, error = message)
-  }
-  out <- new[c("Package", "Maintainer", "Git", "Date", "Reason")]
+  })
+  out <- db[c("Package", "Version", "Maintainer", "Git", "Date", "Reason")]
   write.csv(out, 'archived.csv', row.names = FALSE)
 }
 

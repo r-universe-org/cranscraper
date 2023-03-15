@@ -45,7 +45,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
   archived <- archived_registry()
   packages <- data.frame(
     Package = c(cran$Package, bioc$Package, archived$Package),
-    Version = c(cran$Version, bioc$Version, rep(NA, nrow(archived))),
+    Version = c(cran$Version, bioc$Version, archived$Version),
     Maintainer = first_maintainer(c(cran$Maintainer, bioc$Maintainer, archived$Maintainer)),
     Git = c(cran$Git, bioc$Git, archived$Git),
     Registry = rep(c(NA, 'bioc', 'archived'), c(nrow(cran), nrow(bioc), nrow(archived))),
