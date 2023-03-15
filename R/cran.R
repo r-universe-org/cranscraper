@@ -53,7 +53,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
     stringsAsFactors = FALSE
   )
   packages <- packages[!duplicated(packages$Package),]
-  #packages <- guess_repo_by_maintainer(packages)
+  packages <- guess_repo_by_maintainer(packages)
 
   # Default to keep current values
   current <- utils::read.csv('crantogit.csv', na.strings = "")
@@ -75,6 +75,9 @@ cran_registry_with_status <- function(full_reset = FALSE){
       if(res$status == 200 && test_package_match(res$content, package)){
         packages$found[k] <<- TRUE
         packages$url[k] <<- get_real_url(pkg$Git, res$url)
+      } else if(res$status_code == 429){
+        message("Got HTTP 429, pausing for a bit...")
+        Sys.sleep(15)
       } else {
         # If 404, the package seems removed
         # In case of other network errors, just do nothing (keeps the current values)
