@@ -45,48 +45,43 @@ cran_registry_with_status <- function(full_reset = FALSE){
   archived <- archived_registry()
   packages <- data.frame(
     Package = c(cran$Package, bioc$Package, archived$Package),
+    Version = c(cran$Version, bioc$Version, rep(NA, nrow(archived))),
     Maintainer = first_maintainer(c(cran$Maintainer, bioc$Maintainer, archived$Maintainer)),
     Git = c(cran$Git, bioc$Git, archived$Git),
-    Registry = rep(c(NA, 'bioc', 'archived'), c(length(cran$Package), length(bioc$Package), length(archived$Package))),
+    Registry = rep(c(NA, 'bioc', 'archived'), c(nrow(cran), nrow(bioc), nrow(archived))),
     stringsAsFactors = FALSE
   )
+  packages <- packages[!duplicated(packages$Package),]
   packages$Git[grepl("https://github.com/cran/", packages$Git, fixed = TRUE)] <- NA # No mirror urls
-  packages$hash <- openssl::sha1(tolower(sub("^.*<(.*)>$", "\\1", packages$Maintainer)))
-  maintainerdb <- read.csv("maintainers.csv")
-  packages <- merge(packages, maintainerdb, by = 'hash', all.x = TRUE)
+  #packages <- guess_repo_by_maintainer(packages)
 
-  packages <- packages[!is.na(packages$Git) & !duplicated(packages$Package),]
+  # Default to keep current values
+  current <- utils::read.csv('crantogit.csv', na.strings = "")
+  names(current)[1] <- 'Package'
+  packages <- merge(packages, current, by = 'Package', all.x = TRUE)
+  packages$found <- !is.na(packages$url)
+  packages$url[!packages$found] <- packages$Git[!packages$found]
 
   # Setup scraper outputs
+  packages <- packages[!is.na(packages$url),]
   packages <- packages[order(tolower(packages$Package), method = 'radix'),]
-  if(isTRUE(full_reset)){
-    foundvec <- rep(FALSE, nrow(packages))
-    subdirvec <- rep(NA_character_, nrow(packages))
-    realurlvec <- packages$Git
-  } else {
-    current <- utils::read.csv('crantogit.csv', na.strings = "")
-    pos <- match(packages$Package, current$package)
-    foundvec <- !is.na(pos)
-    subdirvec <- current$subdir[pos]
-    realurlvec <- ifelse(foundvec, current$url[pos], packages$Git)
-  }
   pool <- curl::new_pool(multiplex = FALSE) # try to fix github 403 errors
-  lapply(sample(seq_along(packages$Git)), function(i){
+  lapply(sample(seq_along(packages$Package)), function(i){
     k <- i
     pkg <- as.list(packages[k,])
     package <- pkg$Package
     desc_url <- paste0(pkg$Git, '/raw/HEAD/DESCRIPTION')
     curl::multi_add(make_handle(desc_url), done = function(res){
       if(res$status == 200 && test_package_match(res$content, package)){
-        foundvec[k] <<- TRUE
-        realurlvec[k] <<- get_real_url(pkg$Git, res$url)
+        packages$found[k] <<- TRUE
+        packages$url[k] <<- get_real_url(pkg$Git, res$url)
       } else {
         # If 404, the package seems removed
         # In case of other network errors, just do nothing (keeps the current values)
-        if(isTRUE(foundvec[k]) && res$status == 404 && is.na(subdirvec[k])){
+        if(isTRUE(packages$found[k]) && res$status == 404 && is.na(packages$subdir[k])){
           message("REMOVING package: ", package)
-          foundvec[k] <<- FALSE
-          realurlvec[k] <<- pkg$Git
+          packages$found[k] <<- FALSE
+          packages$url[k] <<- pkg$Git
         }
         message("HTTP or description error: ", package, " from ", pkg$Git,  ": ", res$status)
         alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), package)
@@ -96,14 +91,14 @@ cran_registry_with_status <- function(full_reset = FALSE){
           curl::multi_add(make_handle(alt_url), done = function(res2){
             if(res2$status == 200 && test_package_match(res2$content, package)){
               message("Found subdir for: ", package, " in ", alt_dir)
-              foundvec[k] <<- TRUE
-              subdirvec[k] <<- alt_dir
-              realurlvec[k] <<- get_real_url(pkg$Git, res2$url)
-            } else if(isTRUE(foundvec[k]) && res2$status == 404 && identical(subdirvec[k], alt_dir)){
-              message("REMOVING package: ", package, " with subdir: ", subdirvec[k])
-              foundvec[k] <<- FALSE #package no longer there?
-              realurlvec[k] <<- pkg$Git
-              subdirvec[k] <<- NA_character_
+              packages$found[k] <<- TRUE
+              packages$subdir[k] <<- alt_dir
+              packages$url[k] <<- get_real_url(pkg$Git, res2$url)
+            } else if(isTRUE(packages$found[k]) && res2$status == 404 && identical(packages$subdir[k], alt_dir)){
+              message("REMOVING package: ", package, " with subdir: ", packages$subdir[k])
+              packages$found[k] <<- FALSE #package no longer there?
+              packages$url[k] <<- pkg$Git
+              packages$subdir[k] <<- NA_character_
             }
           }, pool = pool)
         })
@@ -113,9 +108,6 @@ cran_registry_with_status <- function(full_reset = FALSE){
     }, pool = pool)
   })
   curl::multi_run(pool = pool)
-  packages$found <- foundvec
-  packages$subdir <- subdirvec
-  packages$Git <- realurlvec
   return(packages)
 }
 
@@ -164,11 +156,11 @@ cran_registry_update_json <- function(){
   df <- data.frame(
     package = registry$Package,
     maintainer = registry$Maintainer,
-    url = registry$Git,
+    url = registry$url,
     subdir = registry$subdir,
     available = registry$found,
     registry = registry$Registry,
-    owner = slugify_owner(registry$Git),
+    owner = slugify_owner(registry$url),
     stringsAsFactors = FALSE)
 
   # Santiy check and save new CSV
@@ -213,7 +205,7 @@ cran_registry_update_json <- function(){
   } else {
     msg <- paste("Registry update at:", Sys.time())
     gert::git_commit(msg, author = "r-universe[bot] <74155986+r-universe[bot]@users.noreply.github.com>")
-    gert::git_push(verbose = TRUE)
+    #gert::git_push(verbose = TRUE)
   }
 }
 
