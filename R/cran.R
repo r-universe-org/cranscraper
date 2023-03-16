@@ -176,7 +176,7 @@ cran_registry_update_json <- function(){
     added <- newcount - oldcount
     message(sprintf("Updating crantogit.csv: %d rows were %s!", abs(added), ifelse(added < 0, "DELETED", "ADDED")))
     if(added < -100){
-      #stop("This seems wrong. Aborting.")
+      stop("This seems wrong. Aborting.")
     }
   }
   utils::write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE, na = "")
