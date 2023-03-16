@@ -12,7 +12,7 @@ update_archived_csv <- function(){
   message("Unarchived packages: ", paste(setdiff(old$Package, new$Package), collapse = ', '))
   old$Date <- NULL
   old$Reason <- NULL
-  db <- merge(new, old, by = "Package", all.x = TRUE)
+  db <- left_join(new, old, by = "Package")
   db <- db[order(db$Package, method = 'radix'),]
   lapply(which(is.na(db$Version)), function(i){
     pkg <- db$Package[i]

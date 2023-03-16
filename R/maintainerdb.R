@@ -15,7 +15,7 @@ update_maintainers_csv <- function(){
   db <- packages[!duplicated(packages$email), c("package", "email")]
   db$hash <- openssl::sha1(db$email)
   old <- read.csv("maintainers.csv")
-  db <- merge(db, old, by = 'hash', all.x = TRUE)
+  db <- left_join(db, old, by = 'hash')
   pool <- curl::new_pool(multiplex = FALSE, host_con = 2)
   total <- length(db$login)
   done <- 0

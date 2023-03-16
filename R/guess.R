@@ -4,8 +4,8 @@
 # Then proceed as usual.
 guess_repo_by_maintainer <- function(packages){
   packages$hash <- openssl::sha1(tolower(sub("^.*<(.*)>$", "\\1", packages$Maintainer)))
-  maintainerdb <- read.csv("maintainers.csv")
-  packages <- merge(packages, maintainerdb, by = 'hash', all.x = TRUE)
+  maintainerdb <- read.csv('maintainers.csv')
+  packages <- left_join(packages, maintainerdb, by = 'hash')
   unknowns <- which(is.na(packages$Git) & !is.na(packages$Version) & !is.na(packages$login))
   message(sprintf("Checking %d packages with unknown repo but known maintainer", length(unknowns)))
   pool <- curl::new_pool(multiplex = FALSE)

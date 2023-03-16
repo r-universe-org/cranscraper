@@ -58,7 +58,9 @@ cran_registry_with_status <- function(full_reset = FALSE){
   # Default to keep current values
   current <- utils::read.csv('crantogit.csv', na.strings = "")
   names(current)[1] <- 'Package'
-  packages <- merge(packages, current, by = 'Package', all.x = TRUE)
+
+  # Merge old values into new DB
+  packages <- left_join(packages, current, by = 'Package')
   packages$found <- !is.na(packages$url)
   packages$url[!packages$found] <- packages$Git[!packages$found]
 
@@ -253,4 +255,13 @@ make_handle <- function(desc_url){
     }
   }
   handle
+}
+
+# Dedupe y first to prevent returning multiple matches
+# Result should have same number of rows as x
+left_join <- function(x, y, by){
+  if(anyDuplicated(y[[by]])){
+    y <- y[!duplicated(y[[by]]),]
+  }
+  merge(x, y, by = by, all.x = TRUE)
 }
