@@ -114,6 +114,12 @@ cran_registry_with_status <- function(full_reset = FALSE){
     }, pool = pool)
   })
   curl::multi_run(pool = pool)
+
+  # This adds {available: false} packages in registry for detected broken URLs
+  # We could just remove this if we don't care about registering these
+  packages$url[is.na(packages$url)] <- packages$Git[is.na(packages$url)]
+
+  # Return subset of packages with a git url
   packages <- packages[!is.na(packages$url),]
   packages$owner <- slugify_owner(packages$url)
   return(packages)
