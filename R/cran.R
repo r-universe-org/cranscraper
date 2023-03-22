@@ -62,13 +62,14 @@ cran_registry_with_status <- function(full_reset = FALSE){
   # Merge old values into new DB
   packages <- left_join(packages, current, by = 'Package')
   packages$found <- !is.na(packages$url)
-  packages$url[!packages$found] <- packages$Git[!packages$found]
+
+  # If no new candidate url, reverify current url
+  packages$Git[is.na(packages$Git)] <- packages$url[is.na(packages$Git)]
 
   # Setup scraper outputs
-  packages <- packages[!is.na(packages$url),]
   packages <- packages[order(tolower(packages$Package), method = 'radix'),]
   pool <- curl::new_pool(multiplex = FALSE) # try to fix github 403 errors
-  lapply(sample(seq_along(packages$Package)), function(i){
+  lapply(sample(which(!is.na(packages$Git))), function(i){
     k <- i
     pkg <- as.list(packages[k,])
     package <- pkg$Package
@@ -113,6 +114,8 @@ cran_registry_with_status <- function(full_reset = FALSE){
     }, pool = pool)
   })
   curl::multi_run(pool = pool)
+  packages <- packages[!is.na(packages$url),]
+  packages$owner <- slugify_owner(packages$url)
   return(packages)
 }
 
@@ -165,7 +168,7 @@ cran_registry_update_json <- function(){
     subdir = registry$subdir,
     available = registry$found,
     registry = registry$Registry,
-    owner = slugify_owner(registry$url),
+    owner = registry$owner,
     stringsAsFactors = FALSE)
 
   # Santiy check and save new CSV
