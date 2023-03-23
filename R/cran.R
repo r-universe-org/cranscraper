@@ -193,9 +193,9 @@ cran_registry_update_json <- function(){
 
   # Add CRAN mirrors for remaining packages
   # NB: Right now only packages with an 'owner' are actually used in json
-  use_mirror <- is.na(df$url) & !is.na(df$owner) & (is.na(df$registry) | df$registry == 'archived')
-  cranmirror_urls <- paste0('https://github.com/cran/', df$package)
-  df$url[use_mirror] <- cranmirror_urls[use_mirror]
+  use_mirror <- is.na(df$url) & !is.na(df$owner)
+  mirror_server <- ifelse(is.na(df$registry) | df$registry == 'archived', 'https://github.com/cran/', 'https://git.bioconductor.org/packages/')
+  df$url[use_mirror] <- paste0(mirror_server, df$package)[use_mirror]
   df$available[use_mirror] <- NA
   df <- df[!is.na(df$url),]
 
