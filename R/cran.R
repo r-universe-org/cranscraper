@@ -118,6 +118,8 @@ cran_registry_with_status <- function(full_reset = FALSE){
   # This adds {available: false} packages in registry for detected broken URLs
   # We could just remove this if we don't care about registering these
   # packages$url[is.na(packages$url)] <- packages$Git[is.na(packages$url)]
+
+  # Owner is either git user or maintainer
   packages$owner <- slugify_owner(packages$url)
   packages$owner[is.na(packages$owner)] <- packages$login[is.na(packages$owner)]
   return(packages)
@@ -191,10 +193,10 @@ cran_registry_update_json <- function(){
 
   # Add CRAN mirrors for remaining packages
   # NB: Right now only packages with an 'owner' are actually used in json
+  use_mirror <- is.na(df$url) & !is.na(df$owner) & (is.na(df$registry) | df$registry == 'archived')
   cranmirror_urls <- paste0('https://github.com/cran/', df$package)
-  #use_mirror <- is.na(df$url)
-  #df$url[use_mirror] <- cranmirror_urls[use_mirror]
-  #df$available[use_mirror] <- TRUE
+  df$url[use_mirror] <- cranmirror_urls[use_mirror]
+  df$available[use_mirror] <- NA
   df <- df[!is.na(df$url),]
 
   # Split by owner
