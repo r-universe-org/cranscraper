@@ -212,7 +212,12 @@ cran_registry_update_json <- function(){
 
   # A dummy packages.json that is used as fallback for empty universes
   jsonlite::write_json(list(), path = 'packages.json', pretty = TRUE)
-  paths <- c(paths, 'packages.json')
+
+  # Index all repos
+  message("Generating index.json")
+  ownerlist <- as.list(table(sort(df$owner, method = 'radix')))
+  jsonlite::write_json(ownerlist, path = 'index.json', auto_unbox = TRUE, pretty = TRUE)
+  paths <- c(paths, 'packages.json', 'index.json')
 
   # Delete file that no longer exist
   oldfiles <- list.files(pattern="\\.json$")
