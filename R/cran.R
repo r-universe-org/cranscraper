@@ -121,7 +121,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
 
   # Owner is either git user or maintainer
   packages$owner <- slugify_owner(packages$url)
-  packages$owner[is.na(packages$owner)] <- packages$login[is.na(packages$owner)]
+  packages$owner[is.na(packages$owner)] <- tolower(packages$login[is.na(packages$owner)])
   return(packages)
 }
 
