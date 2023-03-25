@@ -280,6 +280,7 @@ make_handle <- function(desc_url){
   if(grepl('gitlab.com', desc_url, fixed = TRUE)){
     token <- Sys.getenv('GITLAB_TOKEN')
     if(nchar(token)){
+      # Not sure this works, Gitlab still gives 403 sometimes
       curl::handle_setheaders(handle, Authorization = paste('Bearer', token))
     }
   }
