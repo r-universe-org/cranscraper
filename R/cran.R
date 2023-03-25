@@ -69,6 +69,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
   # Setup scraper outputs
   packages <- packages[order(tolower(packages$Package), method = 'radix'),]
   pool <- curl::new_pool(multiplex = FALSE) # try to fix github 403 errors
+  message(sprintf("=== Going to try %d DESCRIPTION urls...", sum(!is.na(packages$Git))))
   lapply(sample(which(!is.na(packages$Git))), function(i){
     k <- i
     pkg <- as.list(packages[k,])
