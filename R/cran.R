@@ -276,6 +276,12 @@ make_handle <- function(desc_url){
       curl::handle_setheaders(handle, Authorization = paste('token', token))
     }
   }
+  if(grepl('gitlab.com', desc_url, fixed = TRUE)){
+    token <- Sys.getenv('GITLAB_TOKEN')
+    if(nchar(token)){
+      curl::handle_setheaders(handle, Authorization = paste('Bearer', token))
+    }
+  }
   handle
 }
 
