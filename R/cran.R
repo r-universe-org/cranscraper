@@ -259,6 +259,7 @@ slugify_owner <- function(url){
 replace_rforge_urls <- function(input){
   input <- gsub("www.rforge.net", "github.com/s-u", input, fixed = TRUE)
   input <- gsub('r-forge\\.r-project\\.org/projects/', 'github.com/r-forge/', input, ignore.case = TRUE)
+  input <- gsub('r-forge\\.r-project\\.org/scm/viewvc\\.php/pkg/\\S*/\\?root=(\\S*)', 'github.com/r-forge/\\1', input, ignore.case = TRUE)
   input <- gsub("https?://lists\\.r-forge\\.r-project\\.org", "", input, ignore.case = TRUE) # Remove URLS to mailing list
   gsub("https?://([A-Za-z0-9_.-]+)\\.r-forge\\.r-project\\.org", 'https://github.com/r-forge/\\1', input, ignore.case = TRUE)
 }
