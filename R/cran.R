@@ -204,6 +204,7 @@ cran_registry_update_json <- function(){
   paths <- vapply(split(df, df$owner), function(userdata){
     path <- paste0(userdata$owner[1], '.json')
     userdata$owner <- NULL
+    userdata$available <- NULL
     if(identical(path, 'bioconductor.json')){
       userdata <- set_bioc_branch(userdata)
     }
