@@ -40,6 +40,10 @@ guess_repo_by_maintainer <- function(packages){
     }, fail = message, pool = pool)
   })
   curl::multi_run(pool = pool)
+
+  # Print some stats
+  total_found  <- sum(!is.na(packages$Git[unknowns]))
+  message(sprintf('Discovered %d of %d unknown packages in the GitHub home of the maintainer!', total_found, length(unknowns)))
   packages
 }
 

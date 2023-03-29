@@ -198,9 +198,12 @@ cran_registry_update_json <- function(){
   mirror_server <- ifelse(is.na(df$registry) | df$registry == 'archived', 'https://github.com/cran/', 'https://git.bioconductor.org/packages/')
   df$url[use_mirror] <- paste0(mirror_server, df$package)[use_mirror]
   df$available[use_mirror] <- NA
-  df <- df[!is.na(df$url),]
+
+  # Print some summary
+  message(sprintf('SUMMARY: Found a total of %d git urls (of which %d using the cran/bioc mirror)', sum(!is.na(df$url)), sum(use_mirror)))
 
   # Split by owner
+  df <- df[!is.na(df$url),]
   paths <- vapply(split(df, df$owner), function(userdata){
     path <- paste0(userdata$owner[1], '.json')
     userdata$owner <- NULL
