@@ -25,7 +25,7 @@ guess_repo_by_maintainer <- function(packages){
             repo_version <- as.package_version(pkginfo$Version)
             cran_version <- as.package_version(packages$Version[i])
             if(repo_version >= cran_version){
-              message("Found new git repo at: ", found_repo)
+              #message("Found new git repo at: ", found_repo)
               packages$Git[i] <<- found_repo
             } else {
               message("Found repo seems outdated: ", found_repo)
