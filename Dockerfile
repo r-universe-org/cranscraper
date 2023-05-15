@@ -1,7 +1,7 @@
 FROM ubuntu:lunar
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV R_BIOC_VERSION 3.16
+ENV R_BIOC_VERSION 3.17
 
 COPY . /pkg
 COPY entrypoint.sh /entrypoint.sh
