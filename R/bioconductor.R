@@ -14,7 +14,8 @@ bioc_registry <- function(){
 }
 
 set_bioc_branch <- function(registry){
-  bioc_version <- as.character(tools:::.BioC_version_associated_with_R_version())
+  yml <- yaml::read_yaml("https://bioconductor.org/config.yaml")
+  bioc_version <- yml$release_version
   branchname <- paste0("RELEASE_", gsub(".", "_", bioc_version, fixed = TRUE))
   hasrelease <- remote_heads_many(registry$url, rep(branchname, nrow(registry)))
   registry$branch <- ifelse(nchar(hasrelease) > 0, branchname, NA_character_)
