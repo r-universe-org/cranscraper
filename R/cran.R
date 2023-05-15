@@ -121,7 +121,8 @@ cran_registry_with_status <- function(full_reset = FALSE){
   # packages$url[is.na(packages$url)] <- packages$Git[is.na(packages$url)]
 
   # Owner is either git user or maintainer
-  packages$owner <- slugify_owner(packages$url)
+  # Set github_only=TRUE to disable non-github universes
+  packages$owner <- slugify_owner(packages$url, github_only = FALSE)
   packages$owner[is.na(packages$owner)] <- tolower(packages$login[is.na(packages$owner)])
   return(packages)
 }
@@ -255,8 +256,10 @@ read_description <- function(desc_url){
   read.dcf(con)
 }
 
-slugify_owner <- function(url){
+slugify_owner <- function(url, github_only = FALSE){
   owner <- sub('.*://([a-z]+).*/([^/]*)/.*', '\\1-\\2', url)
+  if(isTRUE(github_only))
+    owner[!grepl('^github-', owner)] <- NA
   sub('github-', '', owner)
 }
 
