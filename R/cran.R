@@ -122,7 +122,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
 
   # Owner is either git user or maintainer
   # Set github_only=TRUE to disable non-github universes
-  packages$owner <- slugify_owner(packages$url, github_only = FALSE)
+  packages$owner <- slugify_owner(packages$url, github_only = TRUE)
   packages$owner[is.na(packages$owner)] <- tolower(packages$login[is.na(packages$owner)])
   return(packages)
 }
