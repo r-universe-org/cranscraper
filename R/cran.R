@@ -79,6 +79,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
       if(res$status == 200 && test_package_match(res$content, package)){
         packages$found[k] <<- TRUE
         packages$url[k] <<- get_real_url(pkg$Git, res$url)
+        packages$subdir[k] <<- NA_character_
       } else if(res$status_code == 429){
         message("Got HTTP 429, pausing for a bit...")
         Sys.sleep(15)
