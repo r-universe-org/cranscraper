@@ -194,6 +194,12 @@ cran_registry_update_json <- function(){
   utils::write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE, na = "")
   gert::git_add('crantogit.csv')
 
+  # Store unknowns. Some of these do have a known maintainer
+  unknowns <- df[is.na(df$url), c('package', 'registry', 'owner')]
+  unknowns$registry[is.na(unknowns$registry) | unknowns$registry == 'archived'] <- 'cran'
+  utils::write.csv(unknowns, file = 'unknown.csv', quote = FALSE, row.names = FALSE, na = "")
+  gert::git_add('unknown.csv')
+
   # Add CRAN mirrors for remaining packages
   # NB: Right now only packages with an 'owner' are actually used in json
   use_mirror <- is.na(df$url) & !is.na(df$owner)
