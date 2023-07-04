@@ -195,15 +195,7 @@ cran_registry_update_json <- function(){
   gert::git_add('crantogit.csv')
 
   # Store full universe owner map
-  universes <- df
-  universes$registry[is.na(universes$registry) | universes$registry == 'archived'] <- 'cran'
-  no_owner <- is.na(universes$owner)
-  universes$owner[no_owner] <- universes$registry[no_owner]
-  universes <- universes[, c('package', 'owner')]
-  roregistry <- jsonlite::fromJSON('https://ropensci.github.io/roregistry/packages.json')$package
-  universes$owner[universes$package %in% roregistry] <- 'ropensci'
-  utils::write.csv(universes, file = 'universes.csv', quote = FALSE, row.names = FALSE, na = "")
-  gert::git_add('universes.csv')
+  update_universes_csv(df)
 
   # Store unknowns. Some of these do have a known maintainer
   #unknowns <- df[is.na(df$url), c('package', 'registry', 'owner')]
@@ -266,6 +258,20 @@ update_crantogit_csv <- function(){
   update_archived_csv()
   gert::git_add('archived.csv')
   cran_registry_update_json()
+}
+
+update_universes_csv <- function(universes){
+  universes$registry[is.na(universes$registry) | universes$registry == 'archived'] <- 'cran'
+  no_owner <- is.na(universes$owner)
+  universes$owner[no_owner] <- universes$registry[no_owner]
+  universes <- universes[, c('package', 'owner')]
+  # Make rOpenSci primary first if exists
+  roregistry <- jsonlite::fromJSON('https://ropensci.github.io/roregistry/packages.json')
+  universes <- rbind(data.frame(package = roregistry$package, owner = 'ropensci'), universes)
+  universes <- universes[!duplicated(universes$package),] # ropensci first gets preference
+  universes <- universes[order(tolower(universes$package), method = 'radix'),] #after that, re-order alphabetically
+  utils::write.csv(universes, file = 'universes.csv', quote = FALSE, row.names = FALSE, na = "")
+  gert::git_add('universes.csv')
 }
 
 read_description <- function(desc_url){
