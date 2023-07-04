@@ -200,6 +200,8 @@ cran_registry_update_json <- function(){
   no_owner <- is.na(universes$owner)
   universes$owner[no_owner] <- universes$registry[no_owner]
   universes <- universes[, c('package', 'owner')]
+  roregistry <- jsonlite::fromJSON('https://ropensci.github.io/roregistry/packages.json')$package
+  universes$owner[universes$package %in% roregistry] <- 'ropensci'
   utils::write.csv(universes, file = 'universes.csv', quote = FALSE, row.names = FALSE, na = "")
   gert::git_add('universes.csv')
 
