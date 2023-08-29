@@ -19,8 +19,11 @@ update_archived_csv <- function(){
     message("Downloading archived description for: ", pkg)
     tryCatch({
       pkginfo <- as.data.frame(read_description(sprintf('https://raw.githubusercontent.com/cran/%s/HEAD/DESCRIPTION', pkg)))
+      if(length(pkginfo$Encoding)){
+        Encoding(pkginfo$Maintainer[1]) <- pkginfo$Encoding
+      }
       db$Version[i] <<- pkginfo$Version
-      db$Maintainer[i] <<- pkginfo$Maintainer[1]
+      db$Maintainer[i] <<- enc2utf8(pkginfo$Maintainer[1])
       db$Git[i] <<- find_git_url(pkginfo)[1]
     }, error = message)
   })

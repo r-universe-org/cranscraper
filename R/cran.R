@@ -275,7 +275,7 @@ update_universes_csv <- function(universes){
 }
 
 read_description <- function(desc_url){
-  con <- curl::curl(desc_url)
+  con <- url(desc_url, encoding = 'UTF-8')
   on.exit(close(con))
   read.dcf(con)
 }
