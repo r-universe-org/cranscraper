@@ -32,7 +32,7 @@ update_maintainers_csv <- function(){
       if(res$status_code == 200){
         json <- jsonlite::parse_json(rawToChar(res$content))
         commit_email <- tolower(json$commit$author$email)
-        if(commit_email == email){
+        if(identical(commit_email, email)){
           if(length(json$author$login)){
             db$login[i] <<- json$author$login
           }
