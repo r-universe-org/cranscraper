@@ -39,11 +39,7 @@ cran_archived_db <- function(){
   pattern <- "(Removed|Archived) on ([0-9-]+)"
   m <- regexec(pattern, comments)
   db$Date <- as.Date(vapply(regmatches(comments, m), function(str){
-    if(length(str)){
-      sub(pattern, '\\2', str[1])
-    } else {
-      NA_character_
-    }
+    sub(pattern, '\\2', str[1])
   }, character(1)))
   db <- db[!is.na(db$Date) & db$Date >= '2022-01-01',]
   db$Reason <- gsub("\\s", " ", trimws(sub(" as|for", "", sub(pattern, '', db[['X-CRAN-Comment']]))))
