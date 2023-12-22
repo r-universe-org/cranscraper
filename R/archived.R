@@ -36,11 +36,11 @@ cran_archived_db <- function(){
   on.exit(close(con))
   db <- as.data.frame(read.dcf(con))
   comments <- db[['X-CRAN-Comment']]
-  pattern <- "Archived on [0-9-]+"
+  pattern <- "(Removed|Archived) on ([0-9-]+)"
   m <- regexec(pattern, comments)
   db$Date <- as.Date(vapply(regmatches(comments, m), function(str){
     if(length(str)){
-      substring(str, 13)
+      sub(pattern, '\\2', str[1])
     } else {
       NA_character_
     }
