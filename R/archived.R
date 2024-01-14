@@ -41,7 +41,7 @@ cran_archived_db <- function(){
   db$Date <- as.Date(vapply(regmatches(comments, m), function(x){
     x[3]
   }, character(1)))
-  db <- db[!is.na(db$Date) & db$Date >= '2022-01-01',]
+  db <- db[!is.na(db$Package)  & !is.na(db$Date) & db$Date >= '2022-01-01',]
   db$Reason <- gsub("\\s", " ", trimws(sub(" as|for", "", sub(pattern, '', db[['X-CRAN-Comment']]))))
   db[order(db$Package),c("Package", "Date", "Reason")]
 }
