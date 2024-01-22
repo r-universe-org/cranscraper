@@ -9,6 +9,12 @@ cran_registry <- function(){
   on.exit(unlink(tmp))
   curl::curl_download('https://cloud.r-project.org/web/packages/packages.rds', destfile = tmp)
   packages <- as.data.frame(readRDS(tmp), stringsAsFactors = FALSE)
+  winonly <- which(packages$OS_type == 'windows')
+  if(length(winonly)){
+    # Do not include Windows-only packages because they are trouble on our Linux servers
+    packages <- packages[-winonly,]
+  }
+
   # CRAN ships two versions of recommended packages: the 'base' and 'cran' version
   packages <- packages[!duplicated(packages$Package),]
   packages$Git <- find_git_url(packages)
