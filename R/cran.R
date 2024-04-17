@@ -7,7 +7,7 @@
 cran_registry <- function(){
   tmp <- tempfile()
   on.exit(unlink(tmp))
-  curl::curl_download('https://cloud.r-project.org/web/packages/packages.rds', destfile = tmp)
+  curl::curl_download('https://cran.r-project.org/web/packages/packages.rds', destfile = tmp)
   packages <- as.data.frame(readRDS(tmp), stringsAsFactors = FALSE)
   winonly <- which(packages$OS_type == 'windows')
   if(length(winonly)){
