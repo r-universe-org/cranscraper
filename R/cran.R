@@ -200,6 +200,9 @@ cran_registry_update_json <- function(){
   utils::write.csv(csvdata, file = 'crantogit.csv', quote = FALSE, row.names = FALSE, na = "")
   gert::git_add('crantogit.csv')
 
+  # bioc is now a single universe (May 2024)
+  df$owner[df$registry == 'bioc'] <- 'bioc'
+
   # Store full universe owner map
   update_universes_csv(df)
 
