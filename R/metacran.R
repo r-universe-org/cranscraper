@@ -5,7 +5,7 @@
 #' @export
 check_metacran <- function(){
   # Current CRAN state
-  db <- available.packages(repos = 'https://cran.r-project.org')
+  db <- available.packages(repos = 'https://cloud.r-project.org')
   db <- as.data.frame(db[,c("Package", "Version")])
   db <- db[order(db$Package, method = 'radix'),]
   db$Metacran = NA_character_

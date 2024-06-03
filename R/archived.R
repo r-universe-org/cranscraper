@@ -32,7 +32,7 @@ update_archived_csv <- function(){
 }
 
 cran_archived_db <- function(){
-  con <- url("https://cran.r-project.org/src/contrib/PACKAGES.in")
+  con <- url("https://cloud.r-project.org/src/contrib/PACKAGES.in")
   on.exit(close(con))
   db <- as.data.frame(read.dcf(con))
   comments <- db[['X-CRAN-Comment']]
