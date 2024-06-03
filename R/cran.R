@@ -82,7 +82,11 @@ cran_registry_with_status <- function(full_reset = FALSE){
     package <- pkg$Package
     desc_url <- paste0(pkg$Git, '/raw/HEAD/DESCRIPTION')
     curl::multi_add(make_handle(desc_url), done = function(res){
-      if(res$status == 200 && test_package_match(res$content, package)){
+      desc <- parse_description_raw(res$content)
+      if(has_noindex(desc)){
+        res$status <- 404
+      }
+      if(res$status == 200 && test_package_match(desc, package)){
         packages$found[k] <<- TRUE
         packages$url[k] <<- get_real_url(pkg$Git, res$url)
         packages$subdir[k] <<- NA_character_
@@ -103,7 +107,11 @@ cran_registry_with_status <- function(full_reset = FALSE){
         lapply(alt_subdirs, function(alt_dir){
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
           curl::multi_add(make_handle(alt_url), done = function(res2){
-            if(res2$status == 200 && test_package_match(res2$content, package)){
+            desc2 <- parse_description_raw(res2$content)
+            if(has_noindex(desc2)){
+              res2$status <- 404
+            }
+            if(res2$status == 200 && test_package_match(desc2, package)){
               message("Found subdir for: ", package, " in ", alt_dir)
               packages$found[k] <<- TRUE
               packages$subdir[k] <<- alt_dir
@@ -134,9 +142,9 @@ cran_registry_with_status <- function(full_reset = FALSE){
   return(packages)
 }
 
-test_package_match <- function(buf, package){
+test_package_match <- function(desc, package){
   tryCatch({
-    realname <- parse_description_package(buf)
+    realname <- trimws(unname(desc[,'Package']))
     out <- identical(realname, package)
     if(!out){
       message(sprintf("Package name from DESCRIPTION '%s' does not match package '%s'", realname, package))
@@ -148,14 +156,14 @@ test_package_match <- function(buf, package){
   })
 }
 
-parse_description_package <- function(buf){
+parse_description_raw <- function(buf){
   con <- rawConnection(buf)
   on.exit(close(con))
-  desc <- read.dcf(con)
-  if('Config/runiverse/noindex' %in% colnames(desc)){
-    stop("Package has Config/runiverse/noindex field")
-  }
-  trimws(unname(desc[,'Package']))
+  read.dcf(con)
+}
+
+has_noindex <- function(desc){
+  return('Config/runiverse/noindex' %in% colnames(desc))
 }
 
 # This is to detect redirects for moved GitHub repositories
