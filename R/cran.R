@@ -98,7 +98,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
           packages$url[k] <<- pkg$Git
         }
         message("HTTP or description error: ", package, " from ", pkg$Git,  ": ", res$status)
-        alt_subdirs <- sprintf(c("pkg", "r", "%s", "pkg/%s"), package)
+        alt_subdirs <- sprintf(c("pkg", "r", "R", "%s", "pkg/%s"), package)
         if(package == 'duckdb') alt_subdirs <- 'tools/rpkg'
         if(package == 'rstan') alt_subdirs <- 'rstan/rstan'
         lapply(alt_subdirs, function(alt_dir){
