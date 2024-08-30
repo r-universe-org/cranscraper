@@ -33,8 +33,15 @@ update_maintainers_csv <- function(){
         json <- jsonlite::parse_json(rawToChar(res$content))
         commit_email <- tolower(json$commit$author$email)
         if(identical(commit_email, email)){
+          old_login <- db$login[i]
           if(length(json$author$login)){
             db$login[i] <<- json$author$login
+          } else if(!is.na(old_login)){
+            message(sprintf("Testing if %s still exists", old_login))
+            usertest <- curl::curl_fetch_memory(paste0('https://github.com/', old_login))
+            if(usertest$status_code == 404){
+              db$login[i] <<- NA_character_ #force remove if user no longer exists
+            }
           }
         } else {
           message(sprintf("Metacran email mismatch for %s: %s / %s", pkg, commit_email, email))
