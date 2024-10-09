@@ -27,7 +27,7 @@ find_git_url <- function(packages){
   input <- paste(input, replace_rforge_urls(input)) #Prefer GitHub URL over r-forge guess
   input <- gsub('https://github.com/cran/', '', input, fixed = TRUE) # No mirror URLS here
   output <- rep(NA_character_, length(input))
-  pattern <- 'https?://(github.com|gitlab.com|bitbucket.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
+  pattern <- 'https?://(github.com|gitlab.com|bitbucket.org|codeberg.org)/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+'
   m <- regexpr(pattern, input, ignore.case = TRUE)
   rows <- !is.na(m) & m > -1
   urls <- regmatches(input, m)
