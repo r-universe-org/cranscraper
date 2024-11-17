@@ -104,6 +104,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
         if(package == 'adbcdrivermanager') alt_subdirs <- 'r/adbcdrivermanager'
         if(package == 'adbcsqlite') alt_subdirs <- 'r/adbcsqlite'
         if(package == 'adbcpostgresql') alt_subdirs <- 'r/adbcpostgresql'
+        if(package == 'treesitter.r') alt_subdirs <- 'bindings/r'
         lapply(alt_subdirs, function(alt_dir){
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
           curl::multi_add(make_handle(alt_url), done = function(res2){
