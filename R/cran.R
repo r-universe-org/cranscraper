@@ -158,9 +158,6 @@ parse_description_package <- function(buf){
   con <- rawConnection(buf)
   on.exit(close(con))
   desc <- read.dcf(con)
-  if('Config/runiverse/noindex' %in% colnames(desc)){
-    stop("Package has Config/runiverse/noindex field")
-  }
   trimws(unname(desc[,'Package']))
 }
 
