@@ -309,6 +309,7 @@ replace_rforge_urls <- function(input){
 }
 
 normalize_github_urls <- function(input){
+  input <- gsub('gitlab.com/hrbrmstr/', 'github.com/hrbrmstr/', input, fixed = TRUE)
   input <- gsub('//www.github.com', '//github.com', input, fixed = TRUE)
   input <- gsub("https?://([A-Za-z0-9-]+)\\.github\\.io/([A-Za-z0-9_.-]+)", 'https://github.com/\\1/\\2', input)
   sub("https://([A-Za-z0-9-]+)\\.r-universe.dev/([A-Za-z0-9_.-]+)", 'https://github.com/\\1/\\2', input)
