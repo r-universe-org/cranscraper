@@ -37,6 +37,7 @@ find_git_url <- function(packages){
 
 first_maintainer <- function(x){
   vapply(x, function(x){
+    if(is.na(x)) return(x)
     ps <- utils::as.person(x)
     ifelse(length(ps) == 1, x, as.character(ps[1]))
   }, character(1))
@@ -270,6 +271,13 @@ cran_registry_update_json <- function(){
 update_crantogit_csv <- function(){
   update_archived_csv()
   gert::git_add('archived.csv')
+  if(nrow(gert::git_status(staged = TRUE)) == 0){
+    message("No changes in 'archived.csv'")
+  } else {
+    msg <- paste("archived.csv update at:", Sys.time())
+    gert::git_commit(msg, author = "r-universe[bot] <74155986+r-universe[bot]@users.noreply.github.com>")
+    gert::git_push(verbose = TRUE)
+  }
   cran_registry_update_json()
 }
 

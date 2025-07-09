@@ -14,12 +14,13 @@ update_archived_csv <- function(){
   old$Reason <- NULL
   db <- left_join(new, old, by = "Package")
   db <- db[order(db$Package, method = 'radix'),]
-  lapply(which(is.na(db$Version)), function(i){
+  lapply(which(is.na(db$Version) | is.na(db$Maintainer)), function(i){
     pkg <- db$Package[i]
     message("Downloading archived description for: ", pkg)
     tryCatch({
       pkginfo <- as.data.frame(read_description(sprintf('https://raw.githubusercontent.com/cran/%s/HEAD/DESCRIPTION', pkg)))
       if(length(pkginfo$Encoding)){
+        # This requires LC_ALL=en_US.UTF-8 !
         Encoding(pkginfo$Maintainer[1]) <- pkginfo$Encoding
       }
       db$Version[i] <<- pkginfo$Version
