@@ -108,6 +108,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
         if(package == 'treesitter.r') alt_subdirs <- 'bindings/r'
         if(package == 'redatam') alt_subdirs <- 'rpkg'
         if(package == 'xgboost') alt_subdirs <- 'R-package'
+        if(package == 'shinychat') alt_subdirs <- 'pkg-r'
         lapply(alt_subdirs, function(alt_dir){
           alt_url <- sprintf('%s/raw/HEAD/%s/DESCRIPTION', pkg$Git, alt_dir)
           curl::multi_add(make_handle(alt_url), done = function(res2){
