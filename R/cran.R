@@ -289,7 +289,7 @@ update_universes_csv <- function(universes){
   universes$owner[no_owner] <- universes$registry[no_owner]
   universes <- universes[, c('package', 'owner')]
   # Make rOpenSci primary first if exists
-  roregistry <- jsonlite::fromJSON('https://ropensci.github.io/roregistry/packages.json')
+  roregistry <- jsonlite::fromJSON('https://ropensci.github.io/ropensci.r-universe.dev/packages.json')
   universes <- rbind(data.frame(package = roregistry$package, owner = 'ropensci'), universes)
   universes <- universes[!duplicated(universes$package),] # ropensci first gets preference
   universes <- universes[order(tolower(universes$package), method = 'radix'),] #after that, re-order alphabetically
