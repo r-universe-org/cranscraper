@@ -326,7 +326,10 @@ normalize_github_urls <- function(input){
 }
 
 make_handle <- function(desc_url){
-  handle <- curl::new_handle(url = desc_url, useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36')
+  # Codeberg (Anubis anti-bot) blocks browser-like user-agents that don't run the JS challenge
+  ua <- ifelse(grepl('codeberg.org', desc_url, fixed = TRUE), 'r-universe-cranscraper',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36')
+  handle <- curl::new_handle(url = desc_url, useragent = ua)
   if(grepl('github.com', desc_url, fixed = TRUE)){
     token <- Sys.getenv('GITHUB_TOKEN')
     if(nchar(token)){
