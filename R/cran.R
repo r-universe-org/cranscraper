@@ -32,6 +32,21 @@ find_git_url <- function(packages){
   rows <- !is.na(m) & m > -1
   urls <- regmatches(input, m)
   output[rows] <- sub("\\.git$", "", sub("^http://", "https://", tolower(urls)))
+  output <- find_gitlab_urls(input, output)
+  return(output)
+}
+
+# GitLab projects can be nested in subgroups, e.g. gitlab.com/roigrp/solver/ROI.plugin.ecos
+# Prefer such a deeper match over the 2-segment match from find_git_url, but stop at
+# reserved web paths such as gitlab.com/owner/repo/issues (modern GitLab links use /-/
+# before such paths)
+find_gitlab_urls <- function(input, output){
+  reserved <- '-|issues|merge_requests|wikis|tree|blob|raw|tags|releases|commits|commit|pipelines|activity|milestones|boards|snippets|badges|pages|forks|graphs|network|blame|edit|settings|uploads'
+  pattern <- sprintf('https?://gitlab.com/[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+(/(?!(%s)(?![A-Za-z0-9_.-]))[A-Za-z0-9_.-]+)+', reserved)
+  m <- regexpr(pattern, input, ignore.case = TRUE, perl = TRUE)
+  rows <- !is.na(m) & m > -1
+  urls <- regmatches(input, m)
+  output[rows] <- sub("\\.git$", "", sub("^http://", "https://", tolower(urls)))
   return(output)
 }
 
@@ -170,9 +185,16 @@ get_real_url <- function(git_url, description_url){
   # Workaround for bitbucket redirecting to a login page
   if(grepl("atlassian.com", description_url))
     return(git_url)
-  domain <- sub("(.*://[^/]+)/.*", '\\1', git_url)
-  new_repo <- sub(".*://[^/]+/([^/]+/[^/]+).*", '\\1', description_url)
-  updated_git_url <- tolower(paste0(domain, '/', new_repo))
+  if(grepl("/raw/", description_url, fixed = TRUE)){
+    # Effective URL is of the form {repo}/raw/... or {repo}/-/raw/... which
+    # also supports repos in gitlab subgroups (more than 2 path segments)
+    updated_git_url <- tolower(sub("/(-/)?raw/.*", "", description_url))
+  } else {
+    # GitHub redirects to raw.githubusercontent.com/{owner}/{repo}/...
+    domain <- sub("(.*://[^/]+)/.*", '\\1', git_url)
+    new_repo <- sub(".*://[^/]+/([^/]+/[^/]+).*", '\\1', description_url)
+    updated_git_url <- tolower(paste0(domain, '/', new_repo))
+  }
   if(updated_git_url != tolower(git_url)){
     message(sprintf("Repo moved from %s to %s", git_url, updated_git_url))
   }
