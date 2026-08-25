@@ -327,10 +327,24 @@ read_description <- function(desc_url){
 }
 
 slugify_owner <- function(url, github_only = FALSE){
-  owner <- sub('.*://([a-z]+).*/([^/]*)/.*', '\\1-\\2', url)
+  owner <- sub('.*://([a-z]+)[^/]*/([^/]+)/.*', '\\1-\\2', url)
+  owner <- alias_owner_to_github(owner)
   if(isTRUE(github_only))
     owner[!grepl('^github-', owner)] <- NA
   sub('github-', '', owner)
+}
+
+# Map manually verified gitlab/codeberg owners to the github account of the
+# same person, such that their packages get assigned to that universe.
+# See inst/aliases.csv in the cranscraper repo.
+alias_owner_to_github <- function(owner){
+  path <- system.file('aliases.csv', package = 'cranscraper')
+  if(!nchar(path)) path <- 'inst/aliases.csv' # when running from source
+  aliases <- utils::read.csv(path)
+  found <- match(owner, aliases$owner)
+  rows <- !is.na(found)
+  owner[rows] <- paste0('github-', aliases$github[found[rows]])
+  return(owner)
 }
 
 replace_rforge_urls <- function(input){
