@@ -121,6 +121,7 @@ cran_registry_with_status <- function(full_reset = FALSE){
         if(package == 'adbcsqlite') alt_subdirs <- 'r/adbcsqlite'
         if(package == 'adbcpostgresql') alt_subdirs <- 'r/adbcpostgresql'
         if(package == 'treesitter.r') alt_subdirs <- 'bindings/r'
+        if(package == 'KeyNubLicDongle') alt_subdirs <- 'bindings/r'
         if(package == 'redatam') alt_subdirs <- 'rpkg'
         if(package == 'xgboost') alt_subdirs <- 'R-package'
         if(package == 'shinychat') alt_subdirs <- 'pkg-r'
